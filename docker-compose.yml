@@ -1,0 +1,68 @@
+services:
+  server:
+    image: vector-tile-lab/server:latest
+    container_name: vector-tile-lab-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server/media:/app/media
+      - ./server/schema.yaml:/app/schema.yaml
+    env_file:
+      - ./server/.env
+    depends_on:
+      - db
+      - storage
+
+  client:
+    image: vector-tile-lab/client:latest
+    container_name: vector-tile-lab-client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    volumes:
+      - ./client/:/app/
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./client/.env
+    depends_on:
+      - server
+
+  db:
+    image: postgres:17
+    container_name: vector-tile-lab-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  storage:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1
+    container_name: vector-tile-lab-storage
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - storage_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    env_file:
+      - .env
+    command: server /data --console-address ":9001"
+
+volumes:
+  db_data:
+    driver: local
+  storage_data:
+    driver: local

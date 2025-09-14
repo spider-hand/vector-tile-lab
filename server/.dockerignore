@@ -1,0 +1,17 @@
+# Virtual environments
+.venv/
+
+# Environment files
+.env*
+
+# Git
+.gitignore
+
+# Documentation
+README.md
+
+# Database files
+db.sqlite3
+
+# Local development files
+.python-version

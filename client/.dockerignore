@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.vite/
+
+# Environment files
+.env*
+
+# Git
+.gitignore
+
+# Documentation
+README.md

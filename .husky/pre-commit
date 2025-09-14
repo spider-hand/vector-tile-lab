@@ -1,0 +1,9 @@
+cd client
+
+npm run test:unit
+
+npx lint-staged
+
+cd ..
+
+pre-commit run --all-files
