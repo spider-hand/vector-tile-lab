@@ -19,6 +19,7 @@
     "prepare": "cd .. && husky"
   },
   "dependencies": {
+    "maplibre-gl": "^5.7.1",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
   },
