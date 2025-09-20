@@ -4,6 +4,7 @@ from rest_framework import status
 from .models import Dataset
 from .serializers import DatasetSerializer
 from drf_spectacular.utils import extend_schema
+from .tasks import process_uploaded_geojson
 
 
 class DatasetViewSet(
@@ -36,6 +37,11 @@ class DatasetViewSet(
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        process_uploaded_geojson.delay(instance.name)
+        return instance
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

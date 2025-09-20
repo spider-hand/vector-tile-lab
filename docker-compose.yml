@@ -16,6 +16,20 @@ services:
       - db
       - storage
 
+  celery:
+    image: vector-tile-lab/server:latest
+    container_name: vector-tile-lab-celery
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: celery -A server worker --loglevel=info
+    env_file:
+      - ./server/.env
+    depends_on:
+       - redis
+    volumes:
+      - ./server/lab:/app/lab
+
   client:
     image: vector-tile-lab/client:latest
     container_name: vector-tile-lab-client
@@ -61,8 +75,18 @@ services:
       - .env
     command: server /data --console-address ":9001"
 
+  redis:
+    image: redis:8.2
+    container_name: vector-tile-lab-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
 volumes:
   db_data:
     driver: local
   storage_data:
+    driver: local
+  redis_data:
     driver: local
