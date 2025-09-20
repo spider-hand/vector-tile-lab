@@ -39,6 +39,7 @@ import SidebarProvider from '@/components/ui/sidebar/SidebarProvider.vue';
 import UploadSidebar from '@/components/UploadSidebar.vue';
 import { FlaskConical, Upload } from 'lucide-vue-next';
 
+
 const items = [
   { title: 'Upload', icon: Upload },
   { title: 'Tune', icon: FlaskConical },

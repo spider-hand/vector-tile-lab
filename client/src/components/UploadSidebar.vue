@@ -28,8 +28,9 @@
             <X class="h-4 w-4" />
           </Button>
         </div>
-        <Button @click="handleUpload" :disabled="!selectedFile" class="w-full">
-          Upload
+        <Button @click="handleUpload" :disabled="!selectedFile || isCreatingDataset" class="w-full">
+          <LoaderCircle v-if="isCreatingDataset" class="animate-spin" />
+          {{ isCreatingDataset ? 'Uploading...' : 'Upload' }}
         </Button>
       </div>
     </SheetContent>
@@ -37,11 +38,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useSidebar } from '@/components/ui/sidebar/utils'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { CloudUpload, X } from 'lucide-vue-next'
+import { CloudUpload, LoaderCircle, X } from 'lucide-vue-next'
+import { useDatasetQuery } from '@/composables/useDatasetQuery'
+import { toast } from 'vue-sonner'
 
 
 defineProps({
@@ -67,6 +70,8 @@ const sidebarMargin = computed(() => {
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
+
+const { mutateOnCreateDataset, isCreatingDataset, isCreateDatasetSuccess } = useDatasetQuery()
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -99,15 +104,17 @@ function handleDrop(event: DragEvent) {
 
 function handleUpload() {
   if (selectedFile.value) {
-    // TODO: 
-    console.log('Uploading file:', selectedFile.value.name)
+    const fileName = selectedFile.value.name.replace(/\.(geojson|json)$/, '')
 
-    selectedFile.value = null
-    if (fileInput.value) {
-      fileInput.value.value = ''
-    }
-
-    emits('update:open', false)
+    mutateOnCreateDataset({ name: fileName, file: selectedFile.value })
   }
 }
+
+watch(isCreatingDataset, (newVal, oldVal) => {
+  if (oldVal && !newVal && isCreateDatasetSuccess.value) {
+    clearSelectedFile()
+    toast('File uploaded successfully', { position: 'top-center' })
+    emits('update:open', false)
+  }
+})
 </script>
