@@ -16,10 +16,16 @@
 import * as runtime from '../runtime';
 import type {
   Dataset,
+  RetrieveDatasetsProgress200Response,
+  RetrieveDatasetsProgress500Response,
 } from '../models/index';
 import {
     DatasetFromJSON,
     DatasetToJSON,
+    RetrieveDatasetsProgress200ResponseFromJSON,
+    RetrieveDatasetsProgress200ResponseToJSON,
+    RetrieveDatasetsProgress500ResponseFromJSON,
+    RetrieveDatasetsProgress500ResponseToJSON,
 } from '../models/index';
 
 export interface CreateDatasetsRequest {
@@ -32,6 +38,10 @@ export interface DestroyDatasetsRequest {
 }
 
 export interface RetrieveDatasetsRequest {
+    id: number;
+}
+
+export interface RetrieveDatasetsProgressRequest {
     id: number;
 }
 
@@ -197,6 +207,44 @@ export class DatasetsApi extends runtime.BaseAPI {
      */
     async retrieveDatasets(requestParameters: RetrieveDatasetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Dataset> {
         const response = await this.retrieveDatasetsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Retrieves the current processing progress for a specific dataset from Redis cache.
+     * Get dataset processing progress
+     */
+    async retrieveDatasetsProgressRaw(requestParameters: RetrieveDatasetsProgressRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RetrieveDatasetsProgress200Response>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling retrieveDatasetsProgress().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/datasets/{id}/progress/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RetrieveDatasetsProgress200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Retrieves the current processing progress for a specific dataset from Redis cache.
+     * Get dataset processing progress
+     */
+    async retrieveDatasetsProgress(requestParameters: RetrieveDatasetsProgressRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RetrieveDatasetsProgress200Response> {
+        const response = await this.retrieveDatasetsProgressRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

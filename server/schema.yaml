@@ -92,6 +92,61 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/datasets/{id}/progress/:
+    get:
+      operationId: retrieveDatasetsProgress
+      description: Retrieves the current processing progress for a specific dataset
+        from Redis cache.
+      summary: Get dataset processing progress
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this dataset.
+        required: true
+      tags:
+      - datasets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dataset_id:
+                    type: integer
+                  dataset_name:
+                    type: string
+                  progress:
+                    type: integer
+                    minimum: 0
+                    maximum: 100
+                  status:
+                    type: string
+                    enum:
+                    - in_progress
+                    - completed
+                    - failed
+                required:
+                - dataset_id
+                - dataset_name
+                - progress
+                - status
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
 components:
   schemas:
     Dataset:

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { DatasetsApi } from '@/services/apis/DatasetsApi'
 import useApi from './useApi'
 import { toValue, type MaybeRefOrGetter } from 'vue'
+import { RetrieveDatasetsProgress200ResponseStatusEnum } from '@/services'
 
 export const useDatasetQuery = (id?: MaybeRefOrGetter<number | undefined>) => {
   const { apiConfig } = useApi()
@@ -20,6 +21,28 @@ export const useDatasetQuery = (id?: MaybeRefOrGetter<number | undefined>) => {
       datasetsApi.retrieveDatasets({ id: idValue! })
     },
     enabled: () => !!toValue(id),
+  })
+
+  const { data: progress, isError: isProgressError } = useQuery({
+    queryKey: ['datasets', () => toValue(id), 'progress'],
+    queryFn: () => {
+      const idValue = toValue(id)
+      return datasetsApi.retrieveDatasetsProgress({ id: idValue! })
+    },
+    enabled: () => !!toValue(id),
+    refetchInterval: (query) => {
+      // Stop polling when processing is complete or if there's an error
+      if (
+        !query.state.data ||
+        query.state.data.status === RetrieveDatasetsProgress200ResponseStatusEnum.Completed ||
+        query.state.data.status === RetrieveDatasetsProgress200ResponseStatusEnum.Failed
+      ) {
+        return false
+      }
+      // Poll every 2 seconds while processing
+      return 2000
+    },
+    staleTime: 0, // Always refetch to get latest progress
   })
 
   const {
@@ -47,6 +70,8 @@ export const useDatasetQuery = (id?: MaybeRefOrGetter<number | undefined>) => {
     isFetchingDatasets,
     dataset,
     isFetchingDataset,
+    progress,
+    isProgressError,
     mutateOnCreateDataset,
     isCreatingDataset,
     isCreateDatasetSuccess,

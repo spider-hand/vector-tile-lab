@@ -3,5 +3,7 @@ apis/DatasetsApi.ts
 apis/index.ts
 index.ts
 models/Dataset.ts
+models/RetrieveDatasetsProgress200Response.ts
+models/RetrieveDatasetsProgress500Response.ts
 models/index.ts
 runtime.ts
