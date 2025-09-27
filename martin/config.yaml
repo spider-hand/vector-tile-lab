@@ -1,0 +1,4 @@
+pmtiles:
+  force_path_style: true
+  sources:
+    tiles: s3://vector-tile-lab/datasets/tiles/LAU_RG_01M_2024_4326.pmtiles

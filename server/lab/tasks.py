@@ -45,10 +45,10 @@ def process_uploaded_geojson(dataset_id, dataset_name):
 
     print(f"Running tippecanoe for {dataset_name} ...")
 
-    local_mbtiles_path = f"/tmp/{dataset_name}.mbtiles"
+    local_pmtiles_path = f"/tmp/{dataset_name}.pmtiles"
     try:
         progress = subprocess.Popen(
-            ["tippecanoe", "-o", local_mbtiles_path, "-f", local_geojson_path],
+            ["tippecanoe", "-o", local_pmtiles_path, "-f", local_geojson_path],
             stderr=subprocess.PIPE,
             text=True,
             bufsize=1,
@@ -116,11 +116,11 @@ def process_uploaded_geojson(dataset_id, dataset_name):
         print(f"Tippecanoe failed: {e.stderr}")
         return
 
-    print("Uploading mbtiles to MinIO ...")
+    print("Uploading pmtiles to MinIO ...")
 
-    mbtiles_object_name = f"datasets/tiles/{dataset_name}.mbtiles"
+    pmtiles_object_name = f"datasets/tiles/{dataset_name}.pmtiles"
     try:
-        s3.upload_file(local_mbtiles_path, minio_bucket, mbtiles_object_name)
-        print(f"Uploaded {mbtiles_object_name} to MinIO bucket.")
+        s3.upload_file(local_pmtiles_path, minio_bucket, pmtiles_object_name)
+        print(f"Uploaded {pmtiles_object_name} to MinIO bucket.")
     except Exception as e:
-        print(f"Failed to upload mbtiles to MinIO: {e}")
+        print(f"Failed to upload pmtiles to MinIO: {e}")

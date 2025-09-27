@@ -75,9 +75,9 @@ services:
       - .env
     command: server /data --console-address ":9001"
 
-  create-bucket:
+  mc:
     image: minio/mc:RELEASE.2025-08-13T08-35-41Z-cpuv1
-    container_name: vector-tile-lab-create-bucket
+    container_name: vector-tile-lab-mc
     depends_on:
       - storage
     restart: "on-failure"
@@ -104,7 +104,15 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_URL=postgres://postgres:password@postgis:5432/db
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
+      - AWS_REGION=us-east-1
+      - AWS_ENDPOINT_URL=${MINIO_ENDPOINT_URL}
+    volumes:
+      - ./martin/config.yaml:/etc/martin/config.yaml:ro
+    command: ["--config", "/etc/martin/config.yaml"]
     depends_on:
+      - storage
       - postgis
 
   # @see: https://github.com/postgis/docker-postgis/issues/216
