@@ -10,7 +10,7 @@
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem v-for="item in items" :key="item.title">
-                <SidebarMenuButton @click="handleMenuClick(item.title)">
+                <SidebarMenuButton @click="handleMenuClick(item.title)" :is-active="activeItem === item.title">
                   <component :is="item.icon" />
                   <span>{{ item.title }}</span>
                 </SidebarMenuButton>
@@ -24,14 +24,14 @@
       <router-view />
     </main>
 
-    <UploadSidebar :open="uploadSidebarOpen" @update:open="(value) => uploadSidebarOpen = value" />
-    <MetadataSidebar :open="metadataSidebarOpen" @update:open="(value) => metadataSidebarOpen = value" />
-    <PerformanceSidebar :open="performanceSidebarOpen" @update:open="(value) => performanceSidebarOpen = value" />
+    <UploadSidebar :open="uploadSidebarOpen" @update:open="handleMenuClick('Upload')" />
+    <MetadataSidebar :open="metadataSidebarOpen" @update:open="handleMenuClick('Metadata')" />
+    <PerformanceSidebar :open="performanceSidebarOpen" @update:open="handleMenuClick('Performance')" />
   </SidebarProvider>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, type Component } from 'vue'
 import Sidebar from '@/components/ui/sidebar/Sidebar.vue';
 import SidebarContent from '@/components/ui/sidebar/SidebarContent.vue';
 import SidebarGroup from '@/components/ui/sidebar/SidebarGroup.vue';
@@ -45,35 +45,24 @@ import MetadataSidebar from '@/components/MetadataSidebar.vue';
 import PerformanceSidebar from '@/components/PerformanceSidebar.vue';
 import { ChartSpline, FileText, Upload } from 'lucide-vue-next';
 
+type MenuItem = 'Upload' | 'Metadata' | 'Performance';
 
-const items = [
+const items: Array<{ title: MenuItem; icon: Component }> = [
   { title: 'Upload', icon: Upload },
   { title: 'Metadata', icon: FileText },
   { title: 'Performance', icon: ChartSpline }
 ]
 
-const uploadSidebarOpen = ref(false)
-const metadataSidebarOpen = ref(false)
-const performanceSidebarOpen = ref(false)
+const activeItem = ref<MenuItem | null>(null)
+const uploadSidebarOpen = computed(() => activeItem.value === 'Upload')
+const metadataSidebarOpen = computed(() => activeItem.value === 'Metadata')
+const performanceSidebarOpen = computed(() => activeItem.value === 'Performance')
 
-function handleMenuClick(title: string) {
-  switch (title) {
-    case 'Upload':
-      uploadSidebarOpen.value = !uploadSidebarOpen.value
-      metadataSidebarOpen.value = false
-      performanceSidebarOpen.value = false
-      break
-    case 'Metadata':
-      metadataSidebarOpen.value = !metadataSidebarOpen.value
-      uploadSidebarOpen.value = false
-      performanceSidebarOpen.value = false
-      break
-    case 'Performance':
-      performanceSidebarOpen.value = !performanceSidebarOpen.value
-      uploadSidebarOpen.value = false
-      metadataSidebarOpen.value = false
-    default:
-      break
+function handleMenuClick(title: MenuItem) {
+  if (activeItem.value === title) {
+    activeItem.value = null;
+  } else {
+    activeItem.value = title;
   }
 }
 </script>
