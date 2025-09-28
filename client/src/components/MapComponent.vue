@@ -7,6 +7,7 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { onMounted, ref } from 'vue';
+import { mapTileMonitor } from '@/utils';
 
 const mapRef = ref<HTMLElement | null>(null);
 const map = ref<maplibregl.Map | null>(null);
@@ -70,5 +71,8 @@ onMounted(() => {
     center: [6.82, 50.06],
     zoom: 3,
   });
+
+  // @ts-expect-error Type instantiation is excessively deep and possibly infinite.ts-plugin(2589)
+  mapTileMonitor.setup(map.value, "martin-tiles");
 })
 </script>

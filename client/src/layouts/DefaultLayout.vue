@@ -25,7 +25,8 @@
     </main>
 
     <UploadSidebar :open="uploadSidebarOpen" @update:open="(value) => uploadSidebarOpen = value" />
-    <TuneSidebar :open="tuneSidebarOpen" @update:open="(value) => tuneSidebarOpen = value" />
+    <MetadataSidebar :open="metadataSidebarOpen" @update:open="(value) => metadataSidebarOpen = value" />
+    <PerformanceSidebar :open="performanceSidebarOpen" @update:open="(value) => performanceSidebarOpen = value" />
   </SidebarProvider>
 </template>
 
@@ -40,28 +41,37 @@ import SidebarMenuButton from '@/components/ui/sidebar/SidebarMenuButton.vue';
 import SidebarMenuItem from '@/components/ui/sidebar/SidebarMenuItem.vue';
 import SidebarProvider from '@/components/ui/sidebar/SidebarProvider.vue';
 import UploadSidebar from '@/components/UploadSidebar.vue';
-import TuneSidebar from '@/components/TuneSidebar.vue';
-import { FlaskConical, Upload } from 'lucide-vue-next';
+import MetadataSidebar from '@/components/MetadataSidebar.vue';
+import PerformanceSidebar from '@/components/PerformanceSidebar.vue';
+import { ChartSpline, FileText, Upload } from 'lucide-vue-next';
 
 
 const items = [
   { title: 'Upload', icon: Upload },
-  { title: 'Tune', icon: FlaskConical },
+  { title: 'Metadata', icon: FileText },
+  { title: 'Performance', icon: ChartSpline }
 ]
 
 const uploadSidebarOpen = ref(false)
-const tuneSidebarOpen = ref(false)
+const metadataSidebarOpen = ref(false)
+const performanceSidebarOpen = ref(false)
 
 function handleMenuClick(title: string) {
   switch (title) {
     case 'Upload':
       uploadSidebarOpen.value = !uploadSidebarOpen.value
-      tuneSidebarOpen.value = false
+      metadataSidebarOpen.value = false
+      performanceSidebarOpen.value = false
       break
-    case 'Tune':
-      tuneSidebarOpen.value = !tuneSidebarOpen.value
+    case 'Metadata':
+      metadataSidebarOpen.value = !metadataSidebarOpen.value
       uploadSidebarOpen.value = false
+      performanceSidebarOpen.value = false
       break
+    case 'Performance':
+      performanceSidebarOpen.value = !performanceSidebarOpen.value
+      uploadSidebarOpen.value = false
+      metadataSidebarOpen.value = false
     default:
       break
   }
