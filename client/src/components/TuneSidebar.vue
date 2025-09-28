@@ -1,6 +1,7 @@
 <template>
   <Sheet :open="open" @update:open="(value: boolean) => $emit('update:open', value)" :modal="false">
-    <SheetContent side="left" class="w-80 flex flex-col" :style="{ marginLeft: sidebarMargin }">
+    <SheetContent side="left" class="w-80 flex flex-col" :style="{ marginLeft: sidebarMargin }"
+      @interact-outside="(e) => e.preventDefault()">
       <SheetHeader>
         <SheetTitle>Metadata</SheetTitle>
         <SheetDescription>
@@ -51,8 +52,7 @@
                 <div class="flex flex-col gap-1">
                   <span class="text-muted-foreground text-xs">Tiles per Zoom Level:</span>
                   <div class="flex flex-col gap-1">
-                    <div v-for="zoomData in tilesPerZoom" :key="zoomData.zoom"
-                      class="flex justify-between text-xs">
+                    <div v-for="zoomData in tilesPerZoom" :key="zoomData.zoom" class="flex justify-between text-xs">
                       <span>Zoom {{ zoomData.zoom }}:</span>
                       <span class="font-medium">{{ zoomData.tiles.toLocaleString() }}</span>
                     </div>

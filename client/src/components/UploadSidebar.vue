@@ -1,6 +1,7 @@
 <template>
   <Sheet :open="open" @update:open="(value) => $emit('update:open', value)" :modal="false">
-    <SheetContent side="left" class="w-80 flex flex-col gap-4" :style="{ marginLeft: sidebarMargin }">
+    <SheetContent side="left" class="w-80 flex flex-col gap-4" :style="{ marginLeft: sidebarMargin }"
+      @interact-outside="(e) => e.preventDefault()">
       <SheetHeader>
         <SheetTitle>Upload GeoJSON</SheetTitle>
         <SheetDescription>
