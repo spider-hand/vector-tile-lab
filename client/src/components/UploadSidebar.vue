@@ -12,7 +12,7 @@
           class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
           @click="triggerFileInput" @dragover.prevent @drop.prevent="handleDrop">
           <CloudUpload class="mx-auto h-8 w-8 text-gray-400 mb-4" />
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-muted-foreground">
             Click to upload or drag and drop
           </p>
           <input ref="fileInput" type="file" accept=".geojson,.json" class="hidden" @change="handleFileSelect" />

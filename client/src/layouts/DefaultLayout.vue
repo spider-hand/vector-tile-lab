@@ -2,7 +2,9 @@
   <SidebarProvider>
     <Sidebar style="
 
---sidebar-width: 10rem; --sidebar-width-mobile: 10rem;">
+--sidebar-width: 10rem; --sidebar-width-mobile: 10rem;
+
+ position: relative; z-index: 999;">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -23,6 +25,7 @@
     </main>
 
     <UploadSidebar :open="uploadSidebarOpen" @update:open="(value) => uploadSidebarOpen = value" />
+    <TuneSidebar :open="tuneSidebarOpen" @update:open="(value) => tuneSidebarOpen = value" />
   </SidebarProvider>
 </template>
 
@@ -37,6 +40,7 @@ import SidebarMenuButton from '@/components/ui/sidebar/SidebarMenuButton.vue';
 import SidebarMenuItem from '@/components/ui/sidebar/SidebarMenuItem.vue';
 import SidebarProvider from '@/components/ui/sidebar/SidebarProvider.vue';
 import UploadSidebar from '@/components/UploadSidebar.vue';
+import TuneSidebar from '@/components/TuneSidebar.vue';
 import { FlaskConical, Upload } from 'lucide-vue-next';
 
 
@@ -46,17 +50,19 @@ const items = [
 ]
 
 const uploadSidebarOpen = ref(false)
+const tuneSidebarOpen = ref(false)
 
 function handleMenuClick(title: string) {
   switch (title) {
     case 'Upload':
-      uploadSidebarOpen.value = true
+      uploadSidebarOpen.value = !uploadSidebarOpen.value
+      tuneSidebarOpen.value = false
       break
     case 'Tune':
-      // Add logic for Tune functionality later
+      tuneSidebarOpen.value = !tuneSidebarOpen.value
+      uploadSidebarOpen.value = false
       break
-    case 'View':
-      // Add logic for View functionality later
+    default:
       break
   }
 }
