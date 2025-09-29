@@ -7,6 +7,7 @@ export interface TileLoadMetrics {
 }
 
 export interface TileLoadStats {
+  initialLoadTime: number
   avgLoadTime: number
   maxLoadTime: number
   minLoadTime: number
@@ -51,6 +52,7 @@ class MapTileMonitor {
   get stats() {
     if (this._metrics.length === 0) {
       return {
+        initialLoadTime: 0,
         avgLoadTime: 0,
         maxLoadTime: 0,
         minLoadTime: 0,
@@ -61,6 +63,7 @@ class MapTileMonitor {
     const loadTimes = this._metrics.map((m) => m.loadTime)
 
     return {
+      initialLoadTime: this._metrics[0].loadTime,
       avgLoadTime: loadTimes.length > 0 ? loadTimes.reduce((a, b) => a + b) / loadTimes.length : 0,
       maxLoadTime: Math.max(...loadTimes, 0),
       minLoadTime: Math.min(...loadTimes, Infinity),

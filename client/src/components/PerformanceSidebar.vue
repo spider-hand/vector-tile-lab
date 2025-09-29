@@ -14,6 +14,10 @@
             <h3 class="font-medium mb-3">Loading Times</h3>
             <div class="flex flex-col gap-3">
               <div class="flex justify-between items-center">
+                <span class="text-muted-foreground text-sm">Initial:</span>
+                <span class="font-medium">{{ initialLoadTime }}ms</span>
+              </div>
+              <div class="flex justify-between items-center">
                 <span class="text-muted-foreground text-sm">Latest:</span>
                 <span class="font-medium">{{ latestLoadTime }}ms</span>
               </div>
@@ -70,6 +74,7 @@ const sidebarMargin = computed(() => {
 });
 
 const stats = ref<TileLoadStats>({
+  initialLoadTime: 0,
   avgLoadTime: 0,
   maxLoadTime: 0,
   minLoadTime: 0,
@@ -79,6 +84,10 @@ const latestMetric = ref<TileLoadMetrics | null>(null);
 
 const latestLoadTime = computed(() => {
   return latestMetric.value ? latestMetric.value.loadTime.toFixed(1) : '0.0';
+});
+
+const initialLoadTime = computed(() => {
+  return stats.value?.initialLoadTime.toFixed(1);
 });
 
 const averageLoadTime = computed(() => {
