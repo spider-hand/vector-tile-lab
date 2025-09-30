@@ -97,43 +97,10 @@ services:
     volumes:
       - redis_data:/data
 
-  martin:
-    image: ghcr.io/maplibre/martin:v0.18.0
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - DATABASE_URL=postgres://postgres:password@postgis:5432/db
-      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
-      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
-      - AWS_REGION=us-east-1
-      - AWS_ENDPOINT_URL=${MINIO_ENDPOINT_URL}
-    volumes:
-      - ./martin/config.yaml:/etc/martin/config.yaml:ro
-    command: ["--config", "/etc/martin/config.yaml"]
-    depends_on:
-      - storage
-      - postgis
-
-  # @see: https://github.com/postgis/docker-postgis/issues/216
-  postgis:
-    image: imresamu/postgis:17-3.5.2-alpine3.21
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgis_data:/var/lib/postgresql/data
-
 volumes:
   db_data:
     driver: local
   storage_data:
     driver: local
   redis_data:
-    driver: local
-  postgis_data:
     driver: local

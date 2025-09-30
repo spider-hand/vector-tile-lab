@@ -2,12 +2,14 @@ from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
-from .models import Dataset
-from .serializers import DatasetSerializer
+from .models import Dataset, Tileset
+from .serializers import DatasetSerializer, TilesetSerializer
 from drf_spectacular.utils import extend_schema
 from .tasks import process_uploaded_geojson
 import redis
 from .constants import TaskStatus
+from .utils import s3_service
+from botocore.exceptions import ClientError
 
 
 class DatasetViewSet(
@@ -98,5 +100,80 @@ class DatasetViewSet(
         except Exception as e:
             return Response(
                 {"error": f"Failed to retrieve progress: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class TilesetViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = Tileset.objects.all().select_related("dataset")
+    serializer_class = TilesetSerializer
+
+    @extend_schema(
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "presigned_url": {"type": "string", "format": "uri"},
+                    "expires_in": {
+                        "type": "integer",
+                        "description": "URL expiration time in seconds",
+                    },
+                },
+                "required": ["presigned_url", "expires_in"],
+            },
+            404: {"type": "object", "properties": {"error": {"type": "string"}}},
+            500: {"type": "object", "properties": {"error": {"type": "string"}}},
+        },
+        summary="Get presigned URL for PMTiles file",
+        description="Generate a presigned URL to access the PMTiles file directly from MinIO/S3 storage.",
+    )
+    @action(detail=True, methods=["get"])
+    def presigned_url(self, request, pk=None):
+        """Generate a presigned URL for accessing the tileset's PMTiles file."""
+        tileset = self.get_object()
+
+        # Check if tileset has a PMTiles file and is completed
+        if not tileset.pmtiles_file or tileset.status != TaskStatus.COMPLETED:
+            return Response(
+                {"error": "Tileset is not completed or PMTiles file is not available"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            # Extract the object key from the file path
+            object_key = tileset.pmtiles_file.name
+
+            # Check if the file exists in S3
+            if not s3_service.check_object_exists(object_key):
+                return Response(
+                    {"error": "PMTiles file not found in storage"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            # Generate presigned URL
+            expires_in = 3600
+            presigned_url = s3_service.generate_presigned_url(object_key, expires_in)
+
+            return Response(
+                {
+                    "presigned_url": presigned_url,
+                    "expires_in": expires_in,
+                    "object_key": object_key,
+                }
+            )
+
+        except ClientError as e:
+            return Response(
+                {"error": f"Failed to generate presigned URL: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Unexpected error: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

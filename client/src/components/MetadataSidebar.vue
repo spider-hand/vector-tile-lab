@@ -5,12 +5,12 @@
       <SheetHeader>
         <SheetTitle>Metadata</SheetTitle>
         <SheetDescription>
-          Analysis of PMTiles source from Martin
+          Analysis of PMTiles
         </SheetDescription>
       </SheetHeader>
       <div class="flex flex-col flex-1 min-h-0 rounded-lg px-4 pb-4 overflow-y-auto">
         <div class="flex-1 overflow-y-auto">
-          <div v-if="metadata" class="flex flex-col gap-4">
+          <div v-if="data" class="flex flex-col gap-4">
             <div class="bg-gray-50 rounded-lg p-4">
               <h3 class="font-medium mb-3">Basic Information</h3>
               <div class="flex flex-col gap-2 text-xs">
@@ -20,15 +20,15 @@
                 </div>
                 <div>
                   <span class="text-muted-foreground">Format:</span>
-                  <p class="font-medium">{{ metadata.format?.toUpperCase() ?? 'PMTiles' }}</p>
+                  <p class="font-medium">{{ data.metadata.format?.toUpperCase() ?? 'PMTiles' }}</p>
                 </div>
                 <div>
                   <span class="text-muted-foreground">Version:</span>
-                  <p class="font-medium">{{ metadata.version ?? 'N/A' }}</p>
+                  <p class="font-medium">{{ data.metadata.version ?? 'N/A' }}</p>
                 </div>
                 <div>
                   <span class="text-muted-foreground">Generator:</span>
-                  <p class="font-medium">{{ metadata.generator ?? 'N/A' }}</p>
+                  <p class="font-medium">{{ data.metadata.generator ?? 'N/A' }}</p>
                 </div>
               </div>
             </div>
@@ -38,11 +38,11 @@
                 <div class="grid grid-cols-2 text-xs">
                   <div>
                     <span class="text-muted-foreground">Min Zoom:</span>
-                    <p class="font-medium">{{ metadata.minzoom }}</p>
+                    <p class="font-medium">{{ data.header.min_zoom }}</p>
                   </div>
                   <div>
                     <span class="text-muted-foreground">Max Zoom:</span>
-                    <p class="font-medium">{{ metadata.maxzoom }}</p>
+                    <p class="font-medium">{{ data.header.max_zoom }}</p>
                   </div>
                 </div>
                 <div>
@@ -62,7 +62,7 @@
             </div>
             <div class="bg-purple-50 rounded-lg p-4">
               <h3 class="font-medium mb-3">Vector Layers</h3>
-              <div v-for="layer in metadata.vector_layers" :key="layer.id" class="flex flex-col gap-3">
+              <div v-for="layer in data.metadata.vector_layers" :key="layer.id" class="flex flex-col gap-3">
                 <div class="flex flex-col gap-2 text-xs">
                   <div>
                     <span class="text-muted-foreground">ID:</span>
@@ -79,7 +79,7 @@
                 </div>
                 <div class="flex flex-col">
                   <span class="text-muted-foreground text-xs">Fields ({{ Object.keys(layer.fields ?? {}).length
-                    }}):</span>
+                  }}):</span>
                   <div class="flex flex-wrap gap-1">
                     <span v-for="(type, field) in layer.fields" :key="field"
                       class="inline-block bg-purple-100 text-purple-900 rounded text-xs p-1">
@@ -89,19 +89,19 @@
                 </div>
               </div>
             </div>
-            <div v-if="metadata.generator_options || metadata.strategies" class="bg-yellow-50 rounded-lg p-4">
+            <div v-if="data.metadata.generator_options || data.metadata.strategies" class="bg-yellow-50 rounded-lg p-4">
               <h3 class="font-medium mb-3">Generation Details</h3>
               <div class="flex flex-col gap-3">
-                <div v-if="metadata.generator_options" class="flex flex-col">
+                <div v-if="data.metadata.generator_options" class="flex flex-col">
                   <span class="text-muted-foreground text-xs">Generator Options:</span>
                   <p class="text-xs font-mono bg-white rounded border break-all p-1">
-                    {{ metadata.generator_options }}
+                    {{ data.metadata.generator_options }}
                   </p>
                 </div>
-                <div v-if="metadata.strategies && metadata.strategies.length > 0" class="flex flex-col">
+                <div v-if="data.metadata.strategies && data.metadata.strategies.length > 0" class="flex flex-col">
                   <span class="text-xs text-muted-foreground">Optimization Strategies:</span>
                   <div class="max-h-32 overflow-y-auto">
-                    <div v-for="(strategy, index) in metadata.strategies" :key="index"
+                    <div v-for="(strategy, index) in data.metadata.strategies" :key="index"
                       class="text-xs bg-white rounded border p-1 flex flex-col gap-1">
                       <span class="font-medium">Zoom {{ index }}:</span>
                       <span v-if="strategy.detail_reduced">
@@ -155,16 +155,24 @@
 import { ref, onMounted, computed } from 'vue';
 import { useSidebar } from '@/components/ui/sidebar/utils';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import useApi from '@/composables/useApi';
+import { TilesetsApi } from '@/services';
+
+interface TileMetadataResponse {
+  header: TileHeader;
+  metadata: TileMetadata;
+}
+
+interface TileHeader {
+  min_zoom: number;
+  max_zoom: number;
+  bounds: [number, number, number, number];
+  center: [number, number, number];
+}
 
 interface TileMetadata {
-  tilejson: string;
-  tiles: string[];
   vector_layers: VectorLayer[];
-  bounds: number[];
-  center: number[];
   description: string;
-  maxzoom: number;
-  minzoom: number;
   name: string;
   version: string;
   format: string;
@@ -239,20 +247,23 @@ const sidebarMargin = computed(() => {
   return sidebarOpen.value ? '10rem' : '0'
 })
 
-const metadata = ref<TileMetadata | null>(null);
+const { apiConfig } = useApi();
+const tilesetsApi = new TilesetsApi(apiConfig);
+
+const data = ref<TileMetadataResponse | null>(null);
 
 const filename = computed(() => {
-  if (!metadata.value?.name) return 'Unknown';
-  return metadata.value.name.replace('/tmp/', '').replace('.pmtiles', '');
+  if (!data.value?.metadata.name) return 'Unknown';
+  return data.value.metadata.name.replace('/tmp/', '').replace('.pmtiles', '');
 });
 
 const tilesPerZoom = computed(() => {
-  if (!metadata.value) return [];
+  if (!data.value) return [];
 
   const result = [];
-  const [west, south, east, north] = metadata.value.bounds;
+  const [west, south, east, north] = data.value.header.bounds;
 
-  for (let zoom = metadata.value.minzoom; zoom <= metadata.value.maxzoom; zoom++) {
+  for (let zoom = data.value.header.min_zoom; zoom <= data.value.header.max_zoom; zoom++) {
     const tiles = calculateTilesAtZoom(west, south, east, north, zoom);
     result.push({ zoom, tiles });
   }
@@ -265,10 +276,10 @@ const estimatedTotalTiles = computed(() => {
 });
 
 const dataStats = computed(() => {
-  if (!metadata.value?.tilestats?.layers) return [];
+  if (!data.value?.metadata?.tilestats?.layers) return [];
 
   const stats: DataStat[] = [];
-  metadata.value.tilestats.layers.forEach(layer => {
+  data.value.metadata.tilestats.layers.forEach(layer => {
     if (layer.attributes) {
       layer.attributes.forEach(attr => {
         stats.push({
@@ -304,27 +315,21 @@ const calculateTilesAtZoom = (west: number, south: number, east: number, north: 
 };
 
 const getLayerGeometry = (layerId: string) => {
-  const layer = metadata.value?.tilestats?.layers?.find(l => l.layer === layerId);
+  const layer = data.value?.metadata?.tilestats?.layers?.find(l => l.layer === layerId);
   return layer?.geometry ?? 'Unknown';
 };
 
 const getLayerFeatureCount = (layerId: string) => {
-  const layer = metadata.value?.tilestats?.layers?.find(l => l.layer === layerId);
+  const layer = data.value?.metadata?.tilestats?.layers?.find(l => l.layer === layerId);
   return layer?.count ?? 0;
 };
 
 const fetchMetadata = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_MARTIN_URL}/tiles`);
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    metadata.value = data;
-  } catch (err) {
-    console.error('Failed to fetch metadata:', err);
+    const response = await tilesetsApi.retrieveTilesets({ id: 1 })
+    data.value = response.metadata as TileMetadataResponse;
+  } catch (error) {
+    console.error('Error fetching metadata:', error);
   }
 };
 

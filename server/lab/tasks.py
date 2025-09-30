@@ -4,15 +4,61 @@ import boto3
 from environ import Env
 import re
 import redis
+from pmtiles.reader import Reader, MmapSource
 from .constants import TaskStatus
+from .models import Dataset, Tileset
 
 env = Env()
 env.read_env()
 
 
+def extract_pmtiles_metadata(pmtiles_path):
+    """Extract metadata from PMTiles"""
+    try:
+        with open(pmtiles_path, "rb") as f:
+            source = MmapSource(f)
+            reader = Reader(source)
+
+            header = reader.header()
+            metadata = reader.metadata()
+            return {
+                "header": {
+                    "min_zoom": header["min_zoom"],
+                    "max_zoom": header["max_zoom"],
+                    "bounds": [
+                        header["min_lon_e7"] / 1e7,
+                        header["min_lat_e7"] / 1e7,
+                        header["max_lon_e7"] / 1e7,
+                        header["max_lat_e7"] / 1e7,
+                    ],
+                    "center": [
+                        header["center_lon_e7"] / 1e7,
+                        header["center_lat_e7"] / 1e7,
+                        header["center_zoom"],
+                    ],
+                },
+                "metadata": metadata,
+            }
+
+    except Exception as e:
+        print(f"Error extracting PMTiles metadata: {e}")
+        return None
+
+
 @shared_task
 def process_uploaded_geojson(dataset_id, dataset_name):
     print(f"Start to process {dataset_name} ...")
+
+    try:
+        dataset = Dataset.objects.get(id=dataset_id)
+    except Dataset.DoesNotExist:
+        print(f"Dataset with id {dataset_id} does not exist")
+        return
+
+    tileset = Tileset.objects.create(
+        dataset=dataset, name="default", status=TaskStatus.IN_PROGRESS, metadata={}
+    )
+    print(f"Created Tileset with id {tileset.id}")
 
     minio_access_key = env.str("MINIO_ROOT_USER", default="minio")
     minio_secret_key = env.str("MINIO_ROOT_PASSWORD", default="minio123")
@@ -40,6 +86,8 @@ def process_uploaded_geojson(dataset_id, dataset_name):
                 "progress": 0,
             },
         )
+        tileset.status = TaskStatus.FAILED
+        tileset.save()
         print(f"Failed to download geojson from MinIO: {e}")
         return
 
@@ -105,6 +153,19 @@ def process_uploaded_geojson(dataset_id, dataset_name):
         )
         print("Progress: 100%")
         print("Tippecanoe completed successfully.")
+
+        # Extract metadata from generated PMTiles file
+        print("Extracting metadata from PMTiles...")
+        pmtiles_metadata = extract_pmtiles_metadata(local_pmtiles_path)
+
+        if pmtiles_metadata:
+            # Save metadata directly to tileset
+            tileset.metadata = pmtiles_metadata
+            tileset.save()
+            print(f"Saved metadata to tileset {tileset.id}")
+        else:
+            print("No metadata found in PMTiles file")
+
     except subprocess.CalledProcessError as e:
         redis_client.hset(
             f"dataset:{dataset_id}",
@@ -113,14 +174,24 @@ def process_uploaded_geojson(dataset_id, dataset_name):
                 "progress": last_progress,
             },
         )
+        tileset.status = TaskStatus.FAILED
+        tileset.save()
         print(f"Tippecanoe failed: {e.stderr}")
         return
 
     print("Uploading pmtiles to MinIO ...")
 
-    pmtiles_object_name = f"datasets/tiles/{dataset_name}.pmtiles"
+    pmtiles_object_name = f"datasets/pmtiles/{dataset_name}.pmtiles"
     try:
         s3.upload_file(local_pmtiles_path, minio_bucket, pmtiles_object_name)
         print(f"Uploaded {pmtiles_object_name} to MinIO bucket.")
+
+        tileset.pmtiles_file.name = pmtiles_object_name
+        tileset.status = TaskStatus.COMPLETED
+        tileset.save()
+        print(f"Updated Tileset {tileset.id} with completion status")
+
     except Exception as e:
+        tileset.status = TaskStatus.FAILED
+        tileset.save()
         print(f"Failed to upload pmtiles to MinIO: {e}")

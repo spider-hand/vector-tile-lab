@@ -147,6 +147,119 @@ paths:
                   error:
                     type: string
           description: ''
+  /api/v1/tilesets/:
+    get:
+      operationId: listTilesets
+      tags:
+      - tilesets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tileset'
+          description: ''
+  /api/v1/tilesets/{id}/:
+    get:
+      operationId: retrieveTilesets
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tileset.
+        required: true
+      tags:
+      - tilesets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tileset'
+          description: ''
+    delete:
+      operationId: destroyTilesets
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tileset.
+        required: true
+      tags:
+      - tilesets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v1/tilesets/{id}/presigned_url/:
+    get:
+      operationId: retrieveTilesetsPresignedUrl
+      description: Generate a presigned URL to access the PMTiles file directly from
+        MinIO/S3 storage.
+      summary: Get presigned URL for PMTiles file
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tileset.
+        required: true
+      tags:
+      - tilesets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  presigned_url:
+                    type: string
+                    format: uri
+                  expires_in:
+                    type: integer
+                    description: URL expiration time in seconds
+                required:
+                - presigned_url
+                - expires_in
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
 components:
   schemas:
     Dataset:
@@ -174,6 +287,60 @@ components:
       - geojson_file
       - id
       - name
+      - updated_at
+    StatusEnum:
+      enum:
+      - in_progress
+      - completed
+      - failed
+      type: string
+      description: |-
+        * `in_progress` - IN_PROGRESS
+        * `completed` - COMPLETED
+        * `failed` - FAILED
+    Tileset:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        dataset:
+          type: integer
+          readOnly: true
+        dataset_name:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        pmtiles_file:
+          type: string
+          format: uri
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        metadata:
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - dataset
+      - dataset_name
+      - id
+      - metadata
+      - name
+      - pmtiles_file
+      - status
       - updated_at
   securitySchemes:
     basicAuth:
