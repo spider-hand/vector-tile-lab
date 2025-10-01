@@ -58,6 +58,39 @@
           </p>
         </div>
       </div>
+
+      <Separator />
+
+      <div class="flex flex-col gap-2 px-4">
+        <h3 class="text-sm font-medium">Datasets</h3>
+        <div v-if="isFetchingDatasets" class="flex items-center justify-center py-4">
+          <LoaderCircle class="h-4 w-4 animate-spin text-muted-foreground" />
+          <span class="text-sm text-muted-foreground ml-2">Loading datasets...</span>
+        </div>
+        <div v-else-if="datasets && datasets.length > 0" class="rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead class="text-xs">ID</TableHead>
+                <TableHead class="text-xs">Filename</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="dataset in datasets" :key="dataset.id"
+                :data-state="selectedDatasetId === dataset.id && 'selected'" @click="selectDataset(dataset.id)"
+                class="cursor-pointer">
+                <TableCell class="text-xs font-medium">{{ dataset.id }}</TableCell>
+                <TableCell class="text-xs truncate" :title="dataset.geojsonFile">
+                  {{ getFileName(dataset.geojsonFile) }}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+        <div v-else class="text-center py-4 text-sm text-muted-foreground">
+          No datasets available
+        </div>
+      </div>
     </SheetContent>
   </Sheet>
 </template>
@@ -67,10 +100,12 @@ import { computed, ref, watch } from 'vue'
 import { useSidebar } from '@/components/ui/sidebar/utils'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { CloudUpload, LoaderCircle, X, CheckCircle, AlertCircle } from 'lucide-vue-next'
 import { useDatasetQuery } from '@/composables/useDatasetQuery'
 import { toast } from 'vue-sonner'
 import type { RetrieveDatasetsProgress200ResponseStatusEnum } from '@/services'
+import Separator from './ui/separator/Separator.vue'
 
 
 defineProps({
@@ -95,10 +130,10 @@ const sidebarMargin = computed(() => {
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
-const createdDatasetId = ref<number | undefined>(undefined)
+const createdDatasetId = ref<number | null>(null)
+const selectedDatasetId = ref<number | null>(null)
 const showProgress = ref(false)
-
-const { mutateOnCreateDataset, isCreatingDataset, isCreateDatasetSuccess, progress, isProgressError } = useDatasetQuery(createdDatasetId)
+const { mutateOnCreateDataset, isCreatingDataset, isCreateDatasetSuccess, progress, isProgressError, datasets, isFetchingDatasets } = useDatasetQuery(selectedDatasetId, createdDatasetId)
 
 const status = computed<RetrieveDatasetsProgress200ResponseStatusEnum>(() => {
   if (isProgressError.value) return 'failed'
@@ -142,7 +177,7 @@ function triggerFileInput() {
 function clearSelectedFile() {
   selectedFile.value = null
   showProgress.value = false
-  createdDatasetId.value = undefined
+  createdDatasetId.value = null
   if (fileInput.value) {
     fileInput.value.value = ''
   }
@@ -191,20 +226,38 @@ function getProgressDescription() {
   return 'Converting your GeoJSON file to vector tiles. This may take a few moments.'
 }
 
+function getFileName(filePath: string): string {
+  return filePath.split('/').pop()?.replace(/\.(geojson|json)$/i, '') || filePath
+}
+
+function selectDataset(id: number) {
+  selectedDatasetId.value = id
+
+  // TODO: Update the tilesets and select the first one as default
+}
+
+watch(isFetchingDatasets, (newVal, oldVal) => {
+  if (oldVal && !newVal && !selectedDatasetId.value && datasets.value && datasets.value.length > 0) {
+    selectedDatasetId.value = datasets.value[0].id
+  }
+})
+
 watch(isCreatingDataset, (newVal, oldVal) => {
   if (oldVal && !newVal && isCreateDatasetSuccess.value) {
     toast('File uploaded successfully. Processing started...', { position: 'top-center' })
   }
 })
 
-watch(() => progress.value?.status, (status) => {
-  if (status === 'completed') {
+watch(() => progress.value?.status, (newVal, oldVal) => {
+  if (oldVal === 'in_progress' && newVal === 'completed') {
+    selectedDatasetId.value = createdDatasetId.value
+
     setTimeout(() => {
       clearSelectedFile()
       toast('Processing complete! Your dataset is now available.', { position: 'top-center' })
       emits('update:open', false)
     }, 3000)
-  } else if (status === 'failed') {
+  } else if (oldVal === 'in_progress' && newVal === 'failed') {
     toast.error('Failed to process dataset', { position: 'top-center' })
     showProgress.value = false
   }

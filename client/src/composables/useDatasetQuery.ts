@@ -4,7 +4,10 @@ import useApi from './useApi'
 import { toValue, type MaybeRefOrGetter } from 'vue'
 import { RetrieveDatasetsProgress200ResponseStatusEnum } from '@/services'
 
-export const useDatasetQuery = (id?: MaybeRefOrGetter<number | undefined>) => {
+export const useDatasetQuery = (
+  id?: MaybeRefOrGetter<number | null>,
+  progressId?: MaybeRefOrGetter<number | null>,
+) => {
   const { apiConfig } = useApi()
   const datasetsApi = new DatasetsApi(apiConfig)
   const queryClient = useQueryClient()
@@ -18,18 +21,18 @@ export const useDatasetQuery = (id?: MaybeRefOrGetter<number | undefined>) => {
     queryKey: ['datasets', () => toValue(id)],
     queryFn: () => {
       const idValue = toValue(id)
-      datasetsApi.retrieveDatasets({ id: idValue! })
+      return datasetsApi.retrieveDatasets({ id: idValue! })
     },
     enabled: () => !!toValue(id),
   })
 
   const { data: progress, isError: isProgressError } = useQuery({
-    queryKey: ['datasets', () => toValue(id), 'progress'],
+    queryKey: ['datasets', () => toValue(progressId), 'progress'],
     queryFn: () => {
-      const idValue = toValue(id)
+      const idValue = toValue(progressId)
       return datasetsApi.retrieveDatasetsProgress({ id: idValue! })
     },
-    enabled: () => !!toValue(id),
+    enabled: () => !!toValue(progressId),
     refetchInterval: (query) => {
       // Stop polling when processing is complete or if there's an error
       if (
