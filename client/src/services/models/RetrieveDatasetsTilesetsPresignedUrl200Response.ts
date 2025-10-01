@@ -16,37 +16,37 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface RetrieveTilesetsPresignedUrl200Response
+ * @interface RetrieveDatasetsTilesetsPresignedUrl200Response
  */
-export interface RetrieveTilesetsPresignedUrl200Response {
+export interface RetrieveDatasetsTilesetsPresignedUrl200Response {
     /**
      * 
      * @type {string}
-     * @memberof RetrieveTilesetsPresignedUrl200Response
+     * @memberof RetrieveDatasetsTilesetsPresignedUrl200Response
      */
     presignedUrl: string;
     /**
      * URL expiration time in seconds
      * @type {number}
-     * @memberof RetrieveTilesetsPresignedUrl200Response
+     * @memberof RetrieveDatasetsTilesetsPresignedUrl200Response
      */
     expiresIn: number;
 }
 
 /**
- * Check if a given object implements the RetrieveTilesetsPresignedUrl200Response interface.
+ * Check if a given object implements the RetrieveDatasetsTilesetsPresignedUrl200Response interface.
  */
-export function instanceOfRetrieveTilesetsPresignedUrl200Response(value: object): value is RetrieveTilesetsPresignedUrl200Response {
+export function instanceOfRetrieveDatasetsTilesetsPresignedUrl200Response(value: object): value is RetrieveDatasetsTilesetsPresignedUrl200Response {
     if (!('presignedUrl' in value) || value['presignedUrl'] === undefined) return false;
     if (!('expiresIn' in value) || value['expiresIn'] === undefined) return false;
     return true;
 }
 
-export function RetrieveTilesetsPresignedUrl200ResponseFromJSON(json: any): RetrieveTilesetsPresignedUrl200Response {
-    return RetrieveTilesetsPresignedUrl200ResponseFromJSONTyped(json, false);
+export function RetrieveDatasetsTilesetsPresignedUrl200ResponseFromJSON(json: any): RetrieveDatasetsTilesetsPresignedUrl200Response {
+    return RetrieveDatasetsTilesetsPresignedUrl200ResponseFromJSONTyped(json, false);
 }
 
-export function RetrieveTilesetsPresignedUrl200ResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): RetrieveTilesetsPresignedUrl200Response {
+export function RetrieveDatasetsTilesetsPresignedUrl200ResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): RetrieveDatasetsTilesetsPresignedUrl200Response {
     if (json == null) {
         return json;
     }
@@ -57,7 +57,7 @@ export function RetrieveTilesetsPresignedUrl200ResponseFromJSONTyped(json: any, 
     };
 }
 
-export function RetrieveTilesetsPresignedUrl200ResponseToJSON(value?: RetrieveTilesetsPresignedUrl200Response | null): any {
+export function RetrieveDatasetsTilesetsPresignedUrl200ResponseToJSON(value?: RetrieveDatasetsTilesetsPresignedUrl200Response | null): any {
     if (value == null) {
         return value;
     }

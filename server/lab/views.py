@@ -110,8 +110,14 @@ class TilesetViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    queryset = Tileset.objects.all().select_related("dataset")
+    queryset = Tileset.objects.all()
     serializer_class = TilesetSerializer
+
+    def get_queryset(self):
+        dataset_id = self.kwargs.get("dataset_id")
+        if dataset_id:
+            return Tileset.objects.filter(dataset_id=dataset_id)
+        return Tileset.objects.all()
 
     @extend_schema(
         responses={
@@ -133,7 +139,7 @@ class TilesetViewSet(
         description="Generate a presigned URL to access the PMTiles file directly from MinIO/S3 storage.",
     )
     @action(detail=True, methods=["get"])
-    def presigned_url(self, request, pk=None):
+    def presigned_url(self, request, pk=None, dataset_id=None):
         """Generate a presigned URL for accessing the tileset's PMTiles file."""
         tileset = self.get_object()
 

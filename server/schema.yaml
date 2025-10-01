@@ -51,6 +51,137 @@ paths:
               schema:
                 $ref: '#/components/schemas/Dataset'
           description: ''
+  /api/v1/datasets/{datasetId}/tilesets/:
+    get:
+      operationId: listDatasetsTilesets
+      parameters:
+      - in: path
+        name: datasetId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - datasets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tileset'
+          description: ''
+  /api/v1/datasets/{datasetId}/tilesets/{id}/:
+    get:
+      operationId: retrieveDatasetsTilesets
+      parameters:
+      - in: path
+        name: datasetId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - datasets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tileset'
+          description: ''
+    delete:
+      operationId: destroyDatasetsTilesets
+      parameters:
+      - in: path
+        name: datasetId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - datasets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v1/datasets/{datasetId}/tilesets/{id}/presigned_url/:
+    get:
+      operationId: retrieveDatasetsTilesetsPresignedUrl
+      description: Generate a presigned URL to access the PMTiles file directly from
+        MinIO/S3 storage.
+      summary: Get presigned URL for PMTiles file
+      parameters:
+      - in: path
+        name: datasetId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - datasets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  presigned_url:
+                    type: string
+                    format: uri
+                  expires_in:
+                    type: integer
+                    description: URL expiration time in seconds
+                required:
+                - presigned_url
+                - expires_in
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
   /api/v1/datasets/{id}/:
     get:
       operationId: retrieveDatasets
@@ -137,119 +268,6 @@ paths:
                 - dataset_name
                 - progress
                 - status
-          description: ''
-        '500':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-          description: ''
-  /api/v1/tilesets/:
-    get:
-      operationId: listTilesets
-      tags:
-      - tilesets
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Tileset'
-          description: ''
-  /api/v1/tilesets/{id}/:
-    get:
-      operationId: retrieveTilesets
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this tileset.
-        required: true
-      tags:
-      - tilesets
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Tileset'
-          description: ''
-    delete:
-      operationId: destroyTilesets
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this tileset.
-        required: true
-      tags:
-      - tilesets
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
-  /api/v1/tilesets/{id}/presigned_url/:
-    get:
-      operationId: retrieveTilesetsPresignedUrl
-      description: Generate a presigned URL to access the PMTiles file directly from
-        MinIO/S3 storage.
-      summary: Get presigned URL for PMTiles file
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this tileset.
-        required: true
-      tags:
-      - tilesets
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  presigned_url:
-                    type: string
-                    format: uri
-                  expires_in:
-                    type: integer
-                    description: URL expiration time in seconds
-                required:
-                - presigned_url
-                - expires_in
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
           description: ''
         '500':
           content:

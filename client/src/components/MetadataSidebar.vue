@@ -246,7 +246,7 @@ const sidebarMargin = computed(() => {
   return sidebarOpen.value ? '10rem' : '0'
 })
 
-const { tileset } = useTilesetQuery(1);
+const { tileset } = useTilesetQuery(1, 1);
 const data = computed(() => tileset.value?.metadata as TileMetadataResponse | null);
 
 const filename = computed(() => {

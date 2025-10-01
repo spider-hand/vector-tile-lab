@@ -1,33 +1,48 @@
 import { useQuery } from '@tanstack/vue-query'
-import { TilesetsApi } from '@/services/apis/TilesetsApi'
+import { DatasetsApi } from '@/services/apis/DatasetsApi'
 import useApi from './useApi'
 import { toValue, type MaybeRefOrGetter } from 'vue'
 
-export const useTilesetQuery = (id?: MaybeRefOrGetter<number | undefined>) => {
+export const useTilesetQuery = (
+  datasetId: MaybeRefOrGetter<number>, 
+  id?: MaybeRefOrGetter<number | undefined>
+) => {
   const { apiConfig } = useApi()
-  const tilesetsApi = new TilesetsApi(apiConfig)
+  const datasetsApi = new DatasetsApi(apiConfig)
 
   const { data: tilesets, isFetching: isFetchingTilesets } = useQuery({
-    queryKey: ['tilesets'],
-    queryFn: () => tilesetsApi.listTilesets(),
+    queryKey: ['datasets', () => toValue(datasetId), 'tilesets'],
+    queryFn: () => {
+      const datasetIdValue = toValue(datasetId)
+      return datasetsApi.listDatasetsTilesets({ datasetId: datasetIdValue })
+    },
+    enabled: () => !!toValue(datasetId),
   })
 
   const { data: tileset, isFetching: isFetchingTileset } = useQuery({
-    queryKey: ['tilesets', () => toValue(id)],
+    queryKey: ['datasets', () => toValue(datasetId), 'tilesets', () => toValue(id)],
     queryFn: () => {
+      const datasetIdValue = toValue(datasetId)
       const idValue = toValue(id)
-      return tilesetsApi.retrieveTilesets({ id: idValue! })
+      return datasetsApi.retrieveDatasetsTilesets({ 
+        datasetId: datasetIdValue, 
+        id: idValue! 
+      })
     },
-    enabled: () => !!toValue(id),
+    enabled: () => !!toValue(datasetId) && !!toValue(id),
   })
 
   const { data: presignedUrl, isFetching: isFetchingPresignedUrl } = useQuery({
-    queryKey: ['tilesets', () => toValue(id), 'presigned-url'],
+    queryKey: ['datasets', () => toValue(datasetId), 'tilesets', () => toValue(id), 'presigned-url'],
     queryFn: () => {
+      const datasetIdValue = toValue(datasetId)
       const idValue = toValue(id)
-      return tilesetsApi.retrieveTilesetsPresignedUrl({ id: idValue! })
+      return datasetsApi.retrieveDatasetsTilesetsPresignedUrl({ 
+        datasetId: datasetIdValue, 
+        id: idValue! 
+      })
     },
-    enabled: () => !!toValue(id),
+    enabled: () => !!toValue(datasetId) && !!toValue(id),
   })
 
   return {

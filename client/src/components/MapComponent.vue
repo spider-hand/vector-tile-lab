@@ -17,7 +17,7 @@ const map = ref<maplibregl.Map | null>(null);
 const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol('pmtiles', protocol.tile);
 
-const { presignedUrl, isFetchingPresignedUrl } = useTilesetQuery(1);
+const { presignedUrl, isFetchingPresignedUrl } = useTilesetQuery(1, 1);
 
 const initializeMap = (pmtilesUrl: string) => {
   if (!mapRef.value) return;

@@ -17,15 +17,21 @@ import * as runtime from '../runtime';
 import type {
   Dataset,
   RetrieveDatasetsProgress200Response,
-  RetrieveDatasetsProgress500Response,
+  RetrieveDatasetsTilesetsPresignedUrl200Response,
+  RetrieveDatasetsTilesetsPresignedUrl404Response,
+  Tileset,
 } from '../models/index';
 import {
     DatasetFromJSON,
     DatasetToJSON,
     RetrieveDatasetsProgress200ResponseFromJSON,
     RetrieveDatasetsProgress200ResponseToJSON,
-    RetrieveDatasetsProgress500ResponseFromJSON,
-    RetrieveDatasetsProgress500ResponseToJSON,
+    RetrieveDatasetsTilesetsPresignedUrl200ResponseFromJSON,
+    RetrieveDatasetsTilesetsPresignedUrl200ResponseToJSON,
+    RetrieveDatasetsTilesetsPresignedUrl404ResponseFromJSON,
+    RetrieveDatasetsTilesetsPresignedUrl404ResponseToJSON,
+    TilesetFromJSON,
+    TilesetToJSON,
 } from '../models/index';
 
 export interface CreateDatasetsRequest {
@@ -37,11 +43,30 @@ export interface DestroyDatasetsRequest {
     id: number;
 }
 
+export interface DestroyDatasetsTilesetsRequest {
+    datasetId: number;
+    id: number;
+}
+
+export interface ListDatasetsTilesetsRequest {
+    datasetId: number;
+}
+
 export interface RetrieveDatasetsRequest {
     id: number;
 }
 
 export interface RetrieveDatasetsProgressRequest {
+    id: number;
+}
+
+export interface RetrieveDatasetsTilesetsRequest {
+    datasetId: number;
+    id: number;
+}
+
+export interface RetrieveDatasetsTilesetsPresignedUrlRequest {
+    datasetId: number;
     id: number;
 }
 
@@ -151,6 +176,46 @@ export class DatasetsApi extends runtime.BaseAPI {
 
     /**
      */
+    async destroyDatasetsTilesetsRaw(requestParameters: DestroyDatasetsTilesetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['datasetId'] == null) {
+            throw new runtime.RequiredError(
+                'datasetId',
+                'Required parameter "datasetId" was null or undefined when calling destroyDatasetsTilesets().'
+            );
+        }
+
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling destroyDatasetsTilesets().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/datasets/{datasetId}/tilesets/{id}/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))).replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async destroyDatasetsTilesets(requestParameters: DestroyDatasetsTilesetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.destroyDatasetsTilesetsRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     */
     async listDatasetsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Dataset>>> {
         const queryParameters: any = {};
 
@@ -173,6 +238,40 @@ export class DatasetsApi extends runtime.BaseAPI {
      */
     async listDatasets(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Dataset>> {
         const response = await this.listDatasetsRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async listDatasetsTilesetsRaw(requestParameters: ListDatasetsTilesetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Tileset>>> {
+        if (requestParameters['datasetId'] == null) {
+            throw new runtime.RequiredError(
+                'datasetId',
+                'Required parameter "datasetId" was null or undefined when calling listDatasetsTilesets().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/datasets/{datasetId}/tilesets/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TilesetFromJSON));
+    }
+
+    /**
+     */
+    async listDatasetsTilesets(requestParameters: ListDatasetsTilesetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Tileset>> {
+        const response = await this.listDatasetsTilesetsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -245,6 +344,92 @@ export class DatasetsApi extends runtime.BaseAPI {
      */
     async retrieveDatasetsProgress(requestParameters: RetrieveDatasetsProgressRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RetrieveDatasetsProgress200Response> {
         const response = await this.retrieveDatasetsProgressRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async retrieveDatasetsTilesetsRaw(requestParameters: RetrieveDatasetsTilesetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tileset>> {
+        if (requestParameters['datasetId'] == null) {
+            throw new runtime.RequiredError(
+                'datasetId',
+                'Required parameter "datasetId" was null or undefined when calling retrieveDatasetsTilesets().'
+            );
+        }
+
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling retrieveDatasetsTilesets().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/datasets/{datasetId}/tilesets/{id}/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))).replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TilesetFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async retrieveDatasetsTilesets(requestParameters: RetrieveDatasetsTilesetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tileset> {
+        const response = await this.retrieveDatasetsTilesetsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Generate a presigned URL to access the PMTiles file directly from MinIO/S3 storage.
+     * Get presigned URL for PMTiles file
+     */
+    async retrieveDatasetsTilesetsPresignedUrlRaw(requestParameters: RetrieveDatasetsTilesetsPresignedUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RetrieveDatasetsTilesetsPresignedUrl200Response>> {
+        if (requestParameters['datasetId'] == null) {
+            throw new runtime.RequiredError(
+                'datasetId',
+                'Required parameter "datasetId" was null or undefined when calling retrieveDatasetsTilesetsPresignedUrl().'
+            );
+        }
+
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling retrieveDatasetsTilesetsPresignedUrl().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/datasets/{datasetId}/tilesets/{id}/presigned_url/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))).replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RetrieveDatasetsTilesetsPresignedUrl200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Generate a presigned URL to access the PMTiles file directly from MinIO/S3 storage.
+     * Get presigned URL for PMTiles file
+     */
+    async retrieveDatasetsTilesetsPresignedUrl(requestParameters: RetrieveDatasetsTilesetsPresignedUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RetrieveDatasetsTilesetsPresignedUrl200Response> {
+        const response = await this.retrieveDatasetsTilesetsPresignedUrlRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
