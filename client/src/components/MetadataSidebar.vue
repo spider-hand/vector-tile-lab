@@ -79,7 +79,7 @@
                 </div>
                 <div class="flex flex-col">
                   <span class="text-muted-foreground text-xs">Fields ({{ Object.keys(layer.fields ?? {}).length
-                  }}):</span>
+                    }}):</span>
                   <div class="flex flex-wrap gap-1">
                     <span v-for="(type, field) in layer.fields" :key="field"
                       class="inline-block bg-purple-100 text-purple-900 rounded text-xs p-1">
@@ -152,11 +152,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { computed } from 'vue';
 import { useSidebar } from '@/components/ui/sidebar/utils';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import useApi from '@/composables/useApi';
-import { TilesetsApi } from '@/services';
+import useTilesetQuery from '@/composables/useTilesetQuery';
 
 interface TileMetadataResponse {
   header: TileHeader;
@@ -247,10 +246,8 @@ const sidebarMargin = computed(() => {
   return sidebarOpen.value ? '10rem' : '0'
 })
 
-const { apiConfig } = useApi();
-const tilesetsApi = new TilesetsApi(apiConfig);
-
-const data = ref<TileMetadataResponse | null>(null);
+const { tileset } = useTilesetQuery(1);
+const data = computed(() => tileset.value?.metadata as TileMetadataResponse | null);
 
 const filename = computed(() => {
   if (!data.value?.metadata.name) return 'Unknown';
@@ -324,18 +321,7 @@ const getLayerFeatureCount = (layerId: string) => {
   return layer?.count ?? 0;
 };
 
-const fetchMetadata = async () => {
-  try {
-    const response = await tilesetsApi.retrieveTilesets({ id: 1 })
-    data.value = response.metadata as TileMetadataResponse;
-  } catch (error) {
-    console.error('Error fetching metadata:', error);
-  }
-};
 
-onMounted(() => {
-  fetchMetadata();
-});
 </script>
 
 <style scoped>
