@@ -1,14 +1,8 @@
 <template>
-  <Sheet :open="open" @update:open="(value) => $emit('update:open', value)" :modal="false">
-    <SheetContent side="left" class="w-80 flex flex-col gap-4" :style="{ marginLeft: sidebarMargin }"
-      @interact-outside="(e) => e.preventDefault()">
-      <SheetHeader>
-        <SheetTitle>Upload GeoJSON</SheetTitle>
-        <SheetDescription>
-          Select a file from your device to display on the map.
-        </SheetDescription>
-      </SheetHeader>
-      <div class="flex flex-col gap-2 px-4">
+  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)"
+               title="Upload GeoJSON" description="Select a file from your device to display on the map.">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-2">
         <div v-if="!selectedFile"
           class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
           @click="triggerFileInput" @dragover.prevent @drop.prevent="handleDrop">
@@ -61,7 +55,7 @@
 
       <Separator />
 
-      <div class="flex flex-col gap-2 px-4">
+      <div class="flex flex-col gap-2">
         <h3 class="text-sm font-medium">Datasets</h3>
         <div v-if="isFetchingDatasets" class="flex items-center justify-center py-4">
           <LoaderCircle class="h-4 w-4 animate-spin text-muted-foreground" />
@@ -91,14 +85,13 @@
           No datasets available
         </div>
       </div>
-    </SheetContent>
-  </Sheet>
+    </div>
+  </BaseSidebar>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useSidebar } from '@/components/ui/sidebar/utils'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import BaseSidebar from './BaseSidebar.vue'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { CloudUpload, LoaderCircle, X, CheckCircle, AlertCircle } from 'lucide-vue-next'
@@ -108,7 +101,6 @@ import useTilesetQuery from '@/composables/useTilesetQuery'
 import { toast } from 'vue-sonner'
 import type { RetrieveDatasetsProgress200ResponseStatusEnum } from '@/services'
 import Separator from './ui/separator/Separator.vue'
-
 
 defineProps({
   open: {
@@ -120,15 +112,6 @@ defineProps({
 const emits = defineEmits<{
   'update:open': [value: boolean]
 }>()
-
-const { open: sidebarOpen, isMobile } = useSidebar()
-
-const sidebarMargin = computed(() => {
-  if (isMobile.value) {
-    return '0'
-  }
-  return sidebarOpen.value ? '10rem' : '0'
-})
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)

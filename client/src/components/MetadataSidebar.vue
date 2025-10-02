@@ -1,16 +1,8 @@
 <template>
-  <Sheet :open="open" @update:open="(value: boolean) => $emit('update:open', value)" :modal="false">
-    <SheetContent side="left" class="w-80 flex flex-col" :style="{ marginLeft: sidebarMargin }"
-      @interact-outside="(e) => e.preventDefault()">
-      <SheetHeader>
-        <SheetTitle>Metadata</SheetTitle>
-        <SheetDescription>
-          Analysis of PMTiles
-        </SheetDescription>
-      </SheetHeader>
-      <div class="flex flex-col flex-1 min-h-0 rounded-lg px-4 pb-4 overflow-y-auto">
-        <div class="flex-1 overflow-y-auto">
-          <div v-if="data" class="flex flex-col gap-4">
+  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)"
+               title="Metadata" description="Analysis of PMTiles">
+    <div class="flex-1">
+      <div v-if="data" class="flex flex-col gap-4">
             <div class="bg-gray-50 rounded-lg p-4">
               <h3 class="font-medium mb-3">Basic Information</h3>
               <div class="flex flex-col gap-2 text-xs">
@@ -146,15 +138,12 @@
             </div>
           </div>
         </div>
-      </div>
-    </SheetContent>
-  </Sheet>
+  </BaseSidebar>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useSidebar } from '@/components/ui/sidebar/utils';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import BaseSidebar from './BaseSidebar.vue';
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
 
@@ -237,15 +226,6 @@ defineProps({
 defineEmits<{
   'update:open': [value: boolean]
 }>()
-
-const { open: sidebarOpen, isMobile } = useSidebar()
-
-const sidebarMargin = computed(() => {
-  if (isMobile.value) {
-    return '0'
-  }
-  return sidebarOpen.value ? '10rem' : '0'
-})
 
 const { selectedDatasetId, selectedTilesetId } = useSelectedData();
 const { tileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
