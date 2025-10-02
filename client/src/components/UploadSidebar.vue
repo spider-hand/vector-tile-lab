@@ -77,7 +77,7 @@
             </TableHeader>
             <TableBody>
               <TableRow v-for="dataset in datasets" :key="dataset.id"
-                :data-state="selectedDatasetId === dataset.id && 'selected'" @click="selectDataset(dataset.id)"
+                :data-state="selectedDatasetId === dataset.id && 'selected'" @click="setSelectedDataset(dataset.id)"
                 class="cursor-pointer">
                 <TableCell class="text-xs font-medium">{{ dataset.id }}</TableCell>
                 <TableCell class="text-xs truncate" :title="dataset.geojsonFile">
@@ -103,6 +103,8 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { CloudUpload, LoaderCircle, X, CheckCircle, AlertCircle } from 'lucide-vue-next'
 import { useDatasetQuery } from '@/composables/useDatasetQuery'
+import { useSelectedData } from '@/composables/useSelectedData'
+import useTilesetQuery from '@/composables/useTilesetQuery'
 import { toast } from 'vue-sonner'
 import type { RetrieveDatasetsProgress200ResponseStatusEnum } from '@/services'
 import Separator from './ui/separator/Separator.vue'
@@ -131,9 +133,11 @@ const sidebarMargin = computed(() => {
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
 const createdDatasetId = ref<number | null>(null)
-const selectedDatasetId = ref<number | null>(null)
 const showProgress = ref(false)
-const { mutateOnCreateDataset, isCreatingDataset, isCreateDatasetSuccess, progress, isProgressError, datasets, isFetchingDatasets } = useDatasetQuery(selectedDatasetId, createdDatasetId)
+
+const { selectedDatasetId, selectedTilesetId, setSelectedDataset, setSelectedTileset } = useSelectedData()
+const { mutateOnCreateDataset, isCreatingDataset, isCreateDatasetSuccess, progress, isProgressError, datasets, isFetchingDatasets, refetchDatasets } = useDatasetQuery(selectedDatasetId, createdDatasetId)
+const { tilesets } = useTilesetQuery(selectedDatasetId, selectedTilesetId)
 
 const status = computed<RetrieveDatasetsProgress200ResponseStatusEnum>(() => {
   if (isProgressError.value) return 'failed'
@@ -230,15 +234,9 @@ function getFileName(filePath: string): string {
   return filePath.split('/').pop()?.replace(/\.(geojson|json)$/i, '') || filePath
 }
 
-function selectDataset(id: number) {
-  selectedDatasetId.value = id
-
-  // TODO: Update the tilesets and select the first one as default
-}
-
 watch(isFetchingDatasets, (newVal, oldVal) => {
   if (oldVal && !newVal && !selectedDatasetId.value && datasets.value && datasets.value.length > 0) {
-    selectedDatasetId.value = datasets.value[0].id
+    setSelectedDataset(datasets.value[0].id)
   }
 })
 
@@ -250,7 +248,11 @@ watch(isCreatingDataset, (newVal, oldVal) => {
 
 watch(() => progress.value?.status, (newVal, oldVal) => {
   if (oldVal === 'in_progress' && newVal === 'completed') {
-    selectedDatasetId.value = createdDatasetId.value
+    refetchDatasets()
+
+    if (createdDatasetId.value) {
+      setSelectedDataset(createdDatasetId.value)
+    }
 
     setTimeout(() => {
       clearSelectedFile()
@@ -267,6 +269,12 @@ watch(() => isProgressError.value, (isError) => {
   if (isError) {
     toast.error('Failed to process dataset', { position: 'top-center' })
     showProgress.value = false
+  }
+})
+
+watch(tilesets, (newTilesets) => {
+  if (newTilesets && newTilesets.length > 0 && !selectedTilesetId.value) {
+    setSelectedTileset(newTilesets[0].id)
   }
 })
 </script>

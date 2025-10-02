@@ -4,8 +4,8 @@ import useApi from './useApi'
 import { toValue, type MaybeRefOrGetter } from 'vue'
 
 export const useTilesetQuery = (
-  datasetId: MaybeRefOrGetter<number>, 
-  id?: MaybeRefOrGetter<number | undefined>
+  datasetId: MaybeRefOrGetter<number | null>, 
+  id?: MaybeRefOrGetter<number | null | undefined>
 ) => {
   const { apiConfig } = useApi()
   const datasetsApi = new DatasetsApi(apiConfig)
@@ -14,6 +14,7 @@ export const useTilesetQuery = (
     queryKey: ['datasets', () => toValue(datasetId), 'tilesets'],
     queryFn: () => {
       const datasetIdValue = toValue(datasetId)
+      if (!datasetIdValue) throw new Error('Dataset ID is required')
       return datasetsApi.listDatasetsTilesets({ datasetId: datasetIdValue })
     },
     enabled: () => !!toValue(datasetId),
@@ -24,9 +25,10 @@ export const useTilesetQuery = (
     queryFn: () => {
       const datasetIdValue = toValue(datasetId)
       const idValue = toValue(id)
+      if (!datasetIdValue || !idValue) throw new Error('Dataset ID and Tileset ID are required')
       return datasetsApi.retrieveDatasetsTilesets({ 
         datasetId: datasetIdValue, 
-        id: idValue! 
+        id: idValue 
       })
     },
     enabled: () => !!toValue(datasetId) && !!toValue(id),
@@ -37,9 +39,10 @@ export const useTilesetQuery = (
     queryFn: () => {
       const datasetIdValue = toValue(datasetId)
       const idValue = toValue(id)
+      if (!datasetIdValue || !idValue) throw new Error('Dataset ID and Tileset ID are required')
       return datasetsApi.retrieveDatasetsTilesetsPresignedUrl({ 
         datasetId: datasetIdValue, 
-        id: idValue! 
+        id: idValue 
       })
     },
     enabled: () => !!toValue(datasetId) && !!toValue(id),

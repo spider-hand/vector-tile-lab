@@ -79,7 +79,7 @@
                 </div>
                 <div class="flex flex-col">
                   <span class="text-muted-foreground text-xs">Fields ({{ Object.keys(layer.fields ?? {}).length
-                    }}):</span>
+                  }}):</span>
                   <div class="flex flex-wrap gap-1">
                     <span v-for="(type, field) in layer.fields" :key="field"
                       class="inline-block bg-purple-100 text-purple-900 rounded text-xs p-1">
@@ -156,6 +156,7 @@ import { computed } from 'vue';
 import { useSidebar } from '@/components/ui/sidebar/utils';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import useTilesetQuery from '@/composables/useTilesetQuery';
+import { useSelectedData } from '@/composables/useSelectedData';
 
 interface TileMetadataResponse {
   header: TileHeader;
@@ -246,7 +247,8 @@ const sidebarMargin = computed(() => {
   return sidebarOpen.value ? '10rem' : '0'
 })
 
-const { tileset } = useTilesetQuery(1, 1);
+const { selectedDatasetId, selectedTilesetId } = useSelectedData();
+const { tileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
 const data = computed(() => tileset.value?.metadata as TileMetadataResponse | null);
 
 const filename = computed(() => {

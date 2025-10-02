@@ -144,13 +144,6 @@ def process_uploaded_geojson(dataset_id, dataset_name):
                 output=None,
                 stderr=err_output,
             )
-        redis_client.hset(
-            f"dataset:{dataset_id}",
-            mapping={
-                "status": TaskStatus.COMPLETED,
-                "progress": 100,
-            },
-        )
         print("Progress: 100%")
         print("Tippecanoe completed successfully.")
 
@@ -165,7 +158,6 @@ def process_uploaded_geojson(dataset_id, dataset_name):
             print(f"Saved metadata to tileset {tileset.id}")
         else:
             print("No metadata found in PMTiles file")
-
     except subprocess.CalledProcessError as e:
         redis_client.hset(
             f"dataset:{dataset_id}",
@@ -189,8 +181,15 @@ def process_uploaded_geojson(dataset_id, dataset_name):
         tileset.pmtiles_file.name = pmtiles_object_name
         tileset.status = TaskStatus.COMPLETED
         tileset.save()
-        print(f"Updated Tileset {tileset.id} with completion status")
 
+        redis_client.hset(
+            f"dataset:{dataset_id}",
+            mapping={
+                "status": TaskStatus.COMPLETED,
+                "progress": 100,
+            },
+        )
+        print(f"Updated Tileset {tileset.id} with completion status")
     except Exception as e:
         tileset.status = TaskStatus.FAILED
         tileset.save()

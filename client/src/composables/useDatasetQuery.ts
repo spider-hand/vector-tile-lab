@@ -56,9 +56,6 @@ export const useDatasetQuery = (
     mutationFn: async ({ name, file }: { name: string; file: File }) => {
       return await datasetsApi.createDatasets({ name, geojsonFile: file })
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['datasets'] })
-    },
   })
 
   const { mutate: mutateOnDeleteDataset, isPending: isDeletingDataset } = useMutation({
@@ -67,6 +64,10 @@ export const useDatasetQuery = (
       queryClient.invalidateQueries({ queryKey: ['datasets'] })
     },
   })
+
+  const refetchDatasets = () => {
+    queryClient.invalidateQueries({ queryKey: ['datasets'] })
+  }
 
   return {
     datasets,
@@ -80,6 +81,7 @@ export const useDatasetQuery = (
     isCreateDatasetSuccess,
     mutateOnDeleteDataset,
     isDeletingDataset,
+    refetchDatasets,
   }
 }
 
