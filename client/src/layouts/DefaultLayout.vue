@@ -25,6 +25,7 @@
     </main>
 
     <UploadSidebar :open="uploadSidebarOpen" @update:open="handleMenuClick('Upload')" />
+    <TilesetSidebar :open="tilesetSidebarOpen" @update:open="handleMenuClick('Tilesets')" />
     <MetadataSidebar :open="metadataSidebarOpen" @update:open="handleMenuClick('Metadata')" />
     <PerformanceSidebar :open="performanceSidebarOpen" @update:open="handleMenuClick('Performance')" />
   </SidebarProvider>
@@ -43,18 +44,21 @@ import SidebarProvider from '@/components/ui/sidebar/SidebarProvider.vue';
 import UploadSidebar from '@/components/UploadSidebar.vue';
 import MetadataSidebar from '@/components/MetadataSidebar.vue';
 import PerformanceSidebar from '@/components/PerformanceSidebar.vue';
-import { ChartSpline, FileText, Upload } from 'lucide-vue-next';
+import { ChartSpline, FileText, Layers, Upload } from 'lucide-vue-next';
+import TilesetSidebar from '@/components/TilesetSidebar.vue';
 
-type MenuItem = 'Upload' | 'Metadata' | 'Performance';
+type MenuItem = 'Upload' | 'Tilesets' | 'Metadata' | 'Performance';
 
 const items: Array<{ title: MenuItem; icon: Component }> = [
   { title: 'Upload', icon: Upload },
+  { title: 'Tilesets', icon: Layers },
   { title: 'Metadata', icon: FileText },
   { title: 'Performance', icon: ChartSpline }
 ]
 
 const activeItem = ref<MenuItem | null>(null)
 const uploadSidebarOpen = computed(() => activeItem.value === 'Upload')
+const tilesetSidebarOpen = computed(() => activeItem.value === 'Tilesets')
 const metadataSidebarOpen = computed(() => activeItem.value === 'Metadata')
 const performanceSidebarOpen = computed(() => activeItem.value === 'Performance')
 
