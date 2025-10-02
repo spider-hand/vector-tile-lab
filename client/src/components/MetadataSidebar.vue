@@ -146,75 +146,7 @@ import { computed } from 'vue';
 import BaseSidebar from './BaseSidebar.vue';
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
-
-interface TileMetadataResponse {
-  header: TileHeader;
-  metadata: TileMetadata;
-}
-
-interface TileHeader {
-  min_zoom: number;
-  max_zoom: number;
-  bounds: [number, number, number, number];
-  center: [number, number, number];
-}
-
-interface TileMetadata {
-  vector_layers: VectorLayer[];
-  description: string;
-  name: string;
-  version: string;
-  format: string;
-  generator: string;
-  generator_options: string;
-  strategies: Strategy[];
-  tilestats: TileStats;
-  [key: string]: unknown;
-}
-
-interface VectorLayer {
-  id: string;
-  fields: { [key: string]: string };
-  description: string;
-  maxzoom: number;
-  minzoom: number;
-}
-
-interface Strategy {
-  detail_reduced?: number;
-  tile_size_desired?: number;
-  tiny_polygons?: number;
-}
-
-interface TileStats {
-  layerCount: number;
-  layers: LayerStat[];
-}
-
-interface LayerStat {
-  attributeCount: number;
-  attributes: AttributeStats[];
-  count: number;
-  geometry: string;
-  layer: string;
-}
-
-interface AttributeStats {
-  attribute: string;
-  count: number;
-  max?: number;
-  min?: number;
-  type: string;
-  values: (string | number | boolean)[];
-}
-
-interface DataStat {
-  field: string;
-  type: string;
-  count: number;
-  min?: number;
-  max?: number;
-}
+import type { DataStat, TileMetadataResponse } from '@/types';
 
 defineProps({
   open: {

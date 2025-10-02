@@ -11,6 +11,7 @@ import { mapTileMonitor } from '@/utils';
 import * as pmtiles from 'pmtiles';
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
+import type { TileMetadataResponse, VectorLayer } from '@/types';
 
 const mapRef = ref<HTMLElement | null>(null);
 const map = ref<maplibregl.Map | null>(null);
@@ -19,7 +20,7 @@ const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol('pmtiles', protocol.tile);
 
 const { selectedDatasetId, selectedTilesetId } = useSelectedData();
-const { presignedUrl, isFetchingPresignedUrl } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
+const { presignedUrl, isFetchingPresignedUrl, tileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
 
 const initializeMap = () => {
   if (!mapRef.value || map.value) return;
@@ -51,58 +52,83 @@ const initializeMap = () => {
   });
 };
 
-const addPmtilesLayer = (pmtilesUrl: string) => {
+const addPmtilesLayer = (pmtilesUrl: string, tilesetMetadata: TileMetadataResponse) => {
   if (!map.value) return;
 
-  if (map.value.getLayer('lau-population-fill')) {
-    map.value.removeLayer('lau-population-fill');
-  }
-  if (map.value.getSource('pmtiles-source')) {
-    map.value.removeSource('pmtiles-source');
-  }
+  removePmtilesLayer();
+
+  mapTileMonitor.clear();
 
   map.value.addSource('pmtiles-source', {
     type: 'vector',
     url: `pmtiles://${pmtilesUrl}`,
   });
 
-  map.value.addLayer({
-    id: 'lau-population-fill',
-    type: 'fill',
-    source: 'pmtiles-source',
-    'source-layer': 'LAU_RG_01M_2024_4326',
-    paint: {
-      'fill-color': [
-        'case',
-        ['has', 'POP_2024'],
-        [
-          'interpolate',
-          ['linear'],
-          ['get', 'POP_2024'],
-          0, '#ffffcc',
-          1000, '#c7e9b4',
-          5000, '#7fcdbb',
-          10000, '#41b6c4',
-          25000, '#2c7fb8',
-          50000, '#253494',
-          100000, '#081d58'
-        ],
-        '#dddddd'
-      ],
-      'fill-opacity': 0.7
-    }
-  });
+  if (tilesetMetadata.metadata.vector_layers) {
+    tilesetMetadata.metadata.vector_layers.forEach((layer: VectorLayer) => {
+      addGenericLayer(layer.id);
+    });
+  }
 
   // @ts-expect-error Type instantiation is excessively deep and possibly infinite.ts-plugin(2589)
   mapTileMonitor.setup(map.value, "pmtiles-source");
 };
 
+const addGenericLayer = (sourceLayer: string) => {
+  if (!map.value) return;
+
+  const color = "#3b82f6"; // blue-500
+
+  map.value.addLayer({
+    id: `${sourceLayer}-fill`,
+    type: 'fill',
+    source: 'pmtiles-source',
+    'source-layer': sourceLayer,
+    paint: {
+      'fill-color': color,
+      'fill-opacity': 0.6
+    }
+  });
+
+  map.value.addLayer({
+    id: `${sourceLayer}-stroke`,
+    type: 'line',
+    source: 'pmtiles-source',
+    'source-layer': sourceLayer,
+    paint: {
+      'line-color': color,
+      'line-width': 1,
+      'line-opacity': 0.8
+    }
+  });
+
+  map.value.addLayer({
+    id: `${sourceLayer}-point`,
+    type: 'circle',
+    source: 'pmtiles-source',
+    'source-layer': sourceLayer,
+    paint: {
+      'circle-color': color,
+      'circle-radius': 4,
+      'circle-opacity': 0.8,
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 1
+    }
+  });
+};
+
 const removePmtilesLayer = () => {
   if (!map.value) return;
 
-  if (map.value.getLayer('lau-population-fill')) {
-    map.value.removeLayer('lau-population-fill');
-  }
+  const layers = map.value.getStyle().layers || [];
+  layers.forEach((layer) => {
+    if ('source' in layer && layer.source === 'pmtiles-source') {
+      if (map.value?.getLayer(layer.id)) {
+        map.value.removeLayer(layer.id);
+      }
+    }
+  });
+
   if (map.value.getSource('pmtiles-source')) {
     map.value.removeSource('pmtiles-source');
   }
@@ -115,8 +141,8 @@ watch(
       initializeMap();
     }
 
-    if (newPresignedUrl?.presignedUrl && !isFetchingPresignedUrl.value) {
-      addPmtilesLayer(newPresignedUrl.presignedUrl);
+    if (newPresignedUrl?.presignedUrl && !isFetchingPresignedUrl.value && tileset.value) {
+      addPmtilesLayer(newPresignedUrl.presignedUrl, tileset.value.metadata);
     } else {
       removePmtilesLayer();
     }
@@ -140,8 +166,8 @@ watch(
 onMounted(() => {
   initializeMap();
 
-  if (presignedUrl.value?.presignedUrl && !isFetchingPresignedUrl.value) {
-    addPmtilesLayer(presignedUrl.value.presignedUrl);
+  if (presignedUrl.value?.presignedUrl && !isFetchingPresignedUrl.value && tileset.value) {
+    addPmtilesLayer(presignedUrl.value.presignedUrl, tileset.value.metadata);
   }
 })
 </script>
