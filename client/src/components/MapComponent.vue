@@ -11,7 +11,7 @@ import { mapTileMonitor } from '@/utils';
 import * as pmtiles from 'pmtiles';
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
-import type { TileMetadataResponse, VectorLayer } from '@/types';
+import type { TileHeader, TileMetadataResponse, VectorLayer } from '@/types';
 
 const mapRef = ref<HTMLElement | null>(null);
 const map = ref<maplibregl.Map | null>(null);
@@ -52,6 +52,19 @@ const initializeMap = () => {
   });
 };
 
+const flyToTilesetBounds = (header: TileHeader) => {
+  if (!map.value) return;
+
+  const [centerLng, centerLat] = header.center;
+
+  map.value.flyTo({
+    center: [centerLng, centerLat],
+    zoom: 3,
+    duration: 1500,
+    essential: true
+  });
+};
+
 const addPmtilesLayer = (pmtilesUrl: string, tilesetMetadata: TileMetadataResponse) => {
   if (!map.value) return;
 
@@ -72,6 +85,8 @@ const addPmtilesLayer = (pmtilesUrl: string, tilesetMetadata: TileMetadataRespon
 
   // @ts-expect-error Type instantiation is excessively deep and possibly infinite.ts-plugin(2589)
   mapTileMonitor.setup(map.value, "pmtiles-source");
+
+  flyToTilesetBounds(tilesetMetadata.header);
 };
 
 const addGenericLayer = (sourceLayer: string) => {
