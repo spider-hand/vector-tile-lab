@@ -10,7 +10,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path(
         "datasets/<int:dataset_id>/tilesets/",
-        TilesetViewSet.as_view({"get": "list"}),
+        TilesetViewSet.as_view({"get": "list", "post": "create"}),
         name="dataset-tilesets-list",
     ),
     path(
@@ -22,5 +22,10 @@ urlpatterns = [
         "datasets/<int:dataset_id>/tilesets/<int:pk>/presigned_url/",
         TilesetViewSet.as_view({"get": "presigned_url"}),
         name="dataset-tilesets-presigned-url",
+    ),
+    path(
+        "datasets/<int:dataset_id>/tilesets/<int:pk>/progress/",
+        TilesetViewSet.as_view({"get": "progress"}),
+        name="dataset-tilesets-progress",
     ),
 ]

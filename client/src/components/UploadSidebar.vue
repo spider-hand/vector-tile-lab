@@ -34,21 +34,21 @@
             <CheckCircle v-else-if="status === 'completed'" class="h-4 w-4 text-green-600" />
             <AlertCircle v-else-if="status === 'failed'" class="h-4 w-4 text-red-600" />
             <span :class="`text-sm font-medium ${progressColors.text}`">
-              {{ getProgressTitle() }}
+              {{ progressTitle }}
             </span>
           </div>
           <div class="w-full">
             <div :class="`flex justify-end text-sm mb-1 ${progressColors.text}`">
-              <span>{{ progress?.progress }}%</span>
+              <span>{{ progressPercentage }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
               <div :class="progressColors.bar" class="h-2 rounded-full transition-all duration-300 ease-out"
-                :style="{ width: `${progress?.progress ?? 0}%` }">
+                :style="{ width: `${progressPercentage}%` }">
               </div>
             </div>
           </div>
           <p :class="`text-xs ${progressColors.description}`">
-            {{ getProgressDescription() }}
+            {{ progressDescription }}
           </p>
         </div>
       </div>
@@ -90,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import BaseSidebar from './BaseSidebar.vue'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -98,8 +98,9 @@ import { CloudUpload, LoaderCircle, X, CheckCircle, AlertCircle } from 'lucide-v
 import { useDatasetQuery } from '@/composables/useDatasetQuery'
 import { useSelectedData } from '@/composables/useSelectedData'
 import useTilesetQuery from '@/composables/useTilesetQuery'
+import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
-import type { RetrieveDatasetsProgress200ResponseStatusEnum } from '@/services'
+
 import Separator from './ui/separator/Separator.vue'
 
 defineProps({
@@ -122,40 +123,18 @@ const { selectedDatasetId, selectedTilesetId, setSelectedDataset, setSelectedTil
 const { mutateOnCreateDataset, isCreatingDataset, isCreateDatasetSuccess, progress, isProgressError, datasets, isFetchingDatasets, refetchDatasets } = useDatasetQuery(selectedDatasetId, createdDatasetId)
 const { tilesets } = useTilesetQuery(selectedDatasetId, selectedTilesetId)
 
-const status = computed<RetrieveDatasetsProgress200ResponseStatusEnum>(() => {
-  if (isProgressError.value) return 'failed'
-  return progress.value?.status || 'in_progress'
-})
-
-const progressColors = computed(() => {
-  switch (status.value) {
-    case 'completed':
-      return {
-        background: 'bg-green-50',
-        border: 'border-green-200',
-        text: 'text-green-900',
-        description: 'text-green-700',
-        bar: 'bg-green-600'
-      }
-    case 'failed':
-      return {
-        background: 'bg-red-50',
-        border: 'border-red-200',
-        text: 'text-red-900',
-        description: 'text-red-700',
-        bar: 'bg-red-600'
-      }
-    case 'in_progress':
-    default:
-      return {
-        background: 'bg-blue-50',
-        border: 'border-blue-200',
-        text: 'text-blue-900',
-        description: 'text-blue-700',
-        bar: 'bg-blue-600'
-      }
+const { status, progressColors, progressTitle, progressDescription, progressPercentage } = useProgress(
+  progress,
+  isProgressError,
+  {
+    processing: 'Processing Dataset...',
+    completed: 'Processing Complete!',
+    failed: 'Processing Failed',
+    processingDescription: 'Converting your GeoJSON file to vector tiles. This may take a few moments.',
+    completedDescription: 'Your vector tiles are ready and available on the map.',
+    failedDescription: 'An error occurred while processing your file.'
   }
-})
+)
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -199,18 +178,6 @@ function handleUpload() {
       }
     })
   }
-}
-
-function getProgressTitle() {
-  if (isProgressError.value || progress.value?.status === 'failed') return 'Processing Failed'
-  if (progress?.value?.status === 'completed') return 'Processing Complete!'
-  return 'Processing Dataset...'
-}
-
-function getProgressDescription() {
-  if (isProgressError.value) return 'An error occurred while processing your file.'
-  if (progress.value?.status === 'completed') return 'Your vector tiles are ready and available on the map.'
-  return 'Converting your GeoJSON file to vector tiles. This may take a few moments.'
 }
 
 function getFileName(filePath: string): string {

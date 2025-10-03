@@ -1,11 +1,12 @@
-.openapi-generator-ignore
 apis/DatasetsApi.ts
 apis/index.ts
 index.ts
+models/CreateDatasetsTilesets400Response.ts
+models/CreateDatasetsTilesetsRequest.ts
 models/Dataset.ts
 models/RetrieveDatasetsProgress200Response.ts
 models/RetrieveDatasetsTilesetsPresignedUrl200Response.ts
-models/RetrieveDatasetsTilesetsPresignedUrl404Response.ts
+models/RetrieveDatasetsTilesetsProgress200Response.ts
 models/StatusEnum.ts
 models/Tileset.ts
 models/index.ts

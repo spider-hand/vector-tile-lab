@@ -15,21 +15,27 @@
 
 import * as runtime from '../runtime';
 import type {
+  CreateDatasetsTilesets400Response,
+  CreateDatasetsTilesetsRequest,
   Dataset,
   RetrieveDatasetsProgress200Response,
   RetrieveDatasetsTilesetsPresignedUrl200Response,
-  RetrieveDatasetsTilesetsPresignedUrl404Response,
+  RetrieveDatasetsTilesetsProgress200Response,
   Tileset,
 } from '../models/index';
 import {
+    CreateDatasetsTilesets400ResponseFromJSON,
+    CreateDatasetsTilesets400ResponseToJSON,
+    CreateDatasetsTilesetsRequestFromJSON,
+    CreateDatasetsTilesetsRequestToJSON,
     DatasetFromJSON,
     DatasetToJSON,
     RetrieveDatasetsProgress200ResponseFromJSON,
     RetrieveDatasetsProgress200ResponseToJSON,
     RetrieveDatasetsTilesetsPresignedUrl200ResponseFromJSON,
     RetrieveDatasetsTilesetsPresignedUrl200ResponseToJSON,
-    RetrieveDatasetsTilesetsPresignedUrl404ResponseFromJSON,
-    RetrieveDatasetsTilesetsPresignedUrl404ResponseToJSON,
+    RetrieveDatasetsTilesetsProgress200ResponseFromJSON,
+    RetrieveDatasetsTilesetsProgress200ResponseToJSON,
     TilesetFromJSON,
     TilesetToJSON,
 } from '../models/index';
@@ -37,6 +43,11 @@ import {
 export interface CreateDatasetsRequest {
     name: string;
     geojsonFile: Blob;
+}
+
+export interface CreateDatasetsTilesetsOperationRequest {
+    datasetId: number;
+    createDatasetsTilesetsRequest?: CreateDatasetsTilesetsRequest;
 }
 
 export interface DestroyDatasetsRequest {
@@ -66,6 +77,11 @@ export interface RetrieveDatasetsTilesetsRequest {
 }
 
 export interface RetrieveDatasetsTilesetsPresignedUrlRequest {
+    datasetId: number;
+    id: number;
+}
+
+export interface RetrieveDatasetsTilesetsProgressRequest {
     datasetId: number;
     id: number;
 }
@@ -138,6 +154,45 @@ export class DatasetsApi extends runtime.BaseAPI {
      */
     async createDatasets(requestParameters: CreateDatasetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Dataset> {
         const response = await this.createDatasetsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Create a new tileset with custom tippecanoe options.
+     */
+    async createDatasetsTilesetsRaw(requestParameters: CreateDatasetsTilesetsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tileset>> {
+        if (requestParameters['datasetId'] == null) {
+            throw new runtime.RequiredError(
+                'datasetId',
+                'Required parameter "datasetId" was null or undefined when calling createDatasetsTilesets().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/datasets/{datasetId}/tilesets/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreateDatasetsTilesetsRequestToJSON(requestParameters['createDatasetsTilesetsRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TilesetFromJSON(jsonValue));
+    }
+
+    /**
+     * Create a new tileset with custom tippecanoe options.
+     */
+    async createDatasetsTilesets(requestParameters: CreateDatasetsTilesetsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tileset> {
+        const response = await this.createDatasetsTilesetsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -430,6 +485,51 @@ export class DatasetsApi extends runtime.BaseAPI {
      */
     async retrieveDatasetsTilesetsPresignedUrl(requestParameters: RetrieveDatasetsTilesetsPresignedUrlRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RetrieveDatasetsTilesetsPresignedUrl200Response> {
         const response = await this.retrieveDatasetsTilesetsPresignedUrlRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Retrieves the current generation progress for a specific tileset from Redis cache.
+     * Get tileset generation progress
+     */
+    async retrieveDatasetsTilesetsProgressRaw(requestParameters: RetrieveDatasetsTilesetsProgressRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RetrieveDatasetsTilesetsProgress200Response>> {
+        if (requestParameters['datasetId'] == null) {
+            throw new runtime.RequiredError(
+                'datasetId',
+                'Required parameter "datasetId" was null or undefined when calling retrieveDatasetsTilesetsProgress().'
+            );
+        }
+
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling retrieveDatasetsTilesetsProgress().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        const response = await this.request({
+            path: `/api/v1/datasets/{datasetId}/tilesets/{id}/progress/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))).replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RetrieveDatasetsTilesetsProgress200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Retrieves the current generation progress for a specific tileset from Redis cache.
+     * Get tileset generation progress
+     */
+    async retrieveDatasetsTilesetsProgress(requestParameters: RetrieveDatasetsTilesetsProgressRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RetrieveDatasetsTilesetsProgress200Response> {
+        const response = await this.retrieveDatasetsTilesetsProgressRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

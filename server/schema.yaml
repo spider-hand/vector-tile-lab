@@ -75,6 +75,65 @@ paths:
                 items:
                   $ref: '#/components/schemas/Tileset'
           description: ''
+    post:
+      operationId: createDatasetsTilesets
+      description: Create a new tileset with custom tippecanoe options.
+      parameters:
+      - in: path
+        name: datasetId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - datasets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name for the new tileset
+                max_zoom:
+                  type: string
+                  description: Maximum zoom level (0-22 or 'g' for guess)
+                  default: g
+                drop_densest:
+                  type: boolean
+                  description: Whether to drop densest as needed
+                  default: true
+              required:
+              - name
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tileset'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
   /api/v1/datasets/{datasetId}/tilesets/{id}/:
     get:
       operationId: retrieveDatasetsTilesets
@@ -172,6 +231,65 @@ paths:
                 properties:
                   error:
                     type: string
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
+  /api/v1/datasets/{datasetId}/tilesets/{id}/progress/:
+    get:
+      operationId: retrieveDatasetsTilesetsProgress
+      description: Retrieves the current generation progress for a specific tileset
+        from Redis cache.
+      summary: Get tileset generation progress
+      parameters:
+      - in: path
+        name: datasetId
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - datasets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tileset_id:
+                    type: integer
+                  tileset_name:
+                    type: string
+                  progress:
+                    type: integer
+                    minimum: 0
+                    maximum: 100
+                  status:
+                    type: string
+                    enum:
+                    - in_progress
+                    - completed
+                    - failed
+                required:
+                - tileset_id
+                - tileset_name
+                - progress
+                - status
           description: ''
         '500':
           content:
