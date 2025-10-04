@@ -4,9 +4,9 @@ import useApi from './useApi'
 import { toValue, type MaybeRefOrGetter } from 'vue'
 
 export const useTilesetQuery = (
-  datasetId: MaybeRefOrGetter<number | null>, 
+  datasetId: MaybeRefOrGetter<number | null>,
   id?: MaybeRefOrGetter<number | null | undefined>,
-  progressTilesetId?: MaybeRefOrGetter<number | null | undefined>
+  progressTilesetId?: MaybeRefOrGetter<number | null | undefined>,
 ) => {
   const { apiConfig } = useApi()
   const datasetsApi = new DatasetsApi(apiConfig)
@@ -16,12 +16,10 @@ export const useTilesetQuery = (
     queryFn: () => {
       const datasetIdValue = toValue(datasetId)
       if (!datasetIdValue) throw new Error('Dataset ID is required')
-      return datasetsApi.listDatasetsTilesets({ datasetId: datasetIdValue })
+      return datasetsApi.listDatasetsTilesets({ datasetId: datasetIdValue, status: 'completed' })
     },
     enabled: () => !!toValue(datasetId),
   })
-
-
 
   const { data: tileset, isFetching: isFetchingTileset } = useQuery({
     queryKey: ['datasets', () => toValue(datasetId), 'tilesets', () => toValue(id)],
@@ -29,23 +27,29 @@ export const useTilesetQuery = (
       const datasetIdValue = toValue(datasetId)
       const idValue = toValue(id)
       if (!datasetIdValue || !idValue) throw new Error('Dataset ID and Tileset ID are required')
-      return datasetsApi.retrieveDatasetsTilesets({ 
-        datasetId: datasetIdValue, 
-        id: idValue 
+      return datasetsApi.retrieveDatasetsTilesets({
+        datasetId: datasetIdValue,
+        id: idValue,
       })
     },
     enabled: () => !!toValue(datasetId) && !!toValue(id),
   })
 
   const { data: presignedUrl, isFetching: isFetchingPresignedUrl } = useQuery({
-    queryKey: ['datasets', () => toValue(datasetId), 'tilesets', () => toValue(id), 'presigned-url'],
+    queryKey: [
+      'datasets',
+      () => toValue(datasetId),
+      'tilesets',
+      () => toValue(id),
+      'presigned-url',
+    ],
     queryFn: () => {
       const datasetIdValue = toValue(datasetId)
       const idValue = toValue(id)
       if (!datasetIdValue || !idValue) throw new Error('Dataset ID and Tileset ID are required')
-      return datasetsApi.retrieveDatasetsTilesetsPresignedUrl({ 
-        datasetId: datasetIdValue, 
-        id: idValue 
+      return datasetsApi.retrieveDatasetsTilesetsPresignedUrl({
+        datasetId: datasetIdValue,
+        id: idValue,
       })
     },
     enabled: () => !!toValue(datasetId) && !!toValue(id),
@@ -55,15 +59,22 @@ export const useTilesetQuery = (
 
   // Progress query for tileset generation - only enabled when progressTilesetId is provided
   const { data: progress, isError: isProgressError } = useQuery({
-    queryKey: ['datasets', () => toValue(datasetId), 'tilesets', () => toValue(progressTilesetId), 'progress'],
+    queryKey: [
+      'datasets',
+      () => toValue(datasetId),
+      'tilesets',
+      () => toValue(progressTilesetId),
+      'progress',
+    ],
     queryFn: () => {
       const datasetIdValue = toValue(datasetId)
       const progressIdValue = toValue(progressTilesetId)
-      if (!datasetIdValue || !progressIdValue) throw new Error('Dataset ID and Progress Tileset ID are required')
-      
-      return datasetsApi.retrieveDatasetsTilesetsProgress({ 
-        datasetId: datasetIdValue, 
-        id: progressIdValue 
+      if (!datasetIdValue || !progressIdValue)
+        throw new Error('Dataset ID and Progress Tileset ID are required')
+
+      return datasetsApi.retrieveDatasetsTilesetsProgress({
+        datasetId: datasetIdValue,
+        id: progressIdValue,
       })
     },
     enabled: () => !!toValue(datasetId) && !!toValue(progressTilesetId),
@@ -88,17 +99,25 @@ export const useTilesetQuery = (
     isPending: isCreatingTileset,
     isSuccess: isCreateTilesetSuccess,
   } = useMutation({
-    mutationFn: async ({ name, maxZoom, dropDensest }: { name: string; maxZoom: string; dropDensest: boolean }) => {
+    mutationFn: async ({
+      name,
+      maxZoom,
+      dropDensest,
+    }: {
+      name: string
+      maxZoom: string
+      dropDensest: boolean
+    }) => {
       const datasetIdValue = toValue(datasetId)
       if (!datasetIdValue) throw new Error('Dataset ID is required')
-      
+
       return await datasetsApi.createDatasetsTilesets({
         datasetId: datasetIdValue,
         createDatasetsTilesetsRequest: {
           name,
           maxZoom,
-          dropDensest
-        }
+          dropDensest,
+        },
       })
     },
     // Don't invalidate immediately - wait for generation to complete
@@ -106,8 +125,8 @@ export const useTilesetQuery = (
 
   // Function to refetch tilesets (called after generation completes)
   const refetchTilesets = () => {
-    queryClient.invalidateQueries({ 
-      queryKey: ['datasets', toValue(datasetId), 'tilesets'] 
+    queryClient.invalidateQueries({
+      queryKey: ['datasets', toValue(datasetId), 'tilesets'],
     })
   }
 

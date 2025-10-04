@@ -61,6 +61,7 @@ export interface DestroyDatasetsTilesetsRequest {
 
 export interface ListDatasetsTilesetsRequest {
     datasetId: number;
+    status?: ListDatasetsTilesetsStatusEnum;
 }
 
 export interface RetrieveDatasetsRequest {
@@ -308,6 +309,10 @@ export class DatasetsApi extends runtime.BaseAPI {
 
         const queryParameters: any = {};
 
+        if (requestParameters['status'] != null) {
+            queryParameters['status'] = requestParameters['status'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
@@ -534,3 +539,13 @@ export class DatasetsApi extends runtime.BaseAPI {
     }
 
 }
+
+/**
+ * @export
+ */
+export const ListDatasetsTilesetsStatusEnum = {
+    Completed: 'completed',
+    Failed: 'failed',
+    InProgress: 'in_progress'
+} as const;
+export type ListDatasetsTilesetsStatusEnum = typeof ListDatasetsTilesetsStatusEnum[keyof typeof ListDatasetsTilesetsStatusEnum];

@@ -2,8 +2,10 @@ from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Dataset, Tileset
 from .serializers import DatasetSerializer, TilesetSerializer
+from .filters import TilesetFilter
 from drf_spectacular.utils import extend_schema
 from .tasks import process_uploaded_geojson, generate_tileset_with_options
 import redis
@@ -113,6 +115,8 @@ class TilesetViewSet(
 ):
     queryset = Tileset.objects.all()
     serializer_class = TilesetSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TilesetFilter
 
     def get_queryset(self):
         dataset_id = self.kwargs.get("dataset_id")
