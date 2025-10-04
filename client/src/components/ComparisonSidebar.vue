@@ -96,7 +96,7 @@ import type { Tileset } from '@/services'
 
 Chart.register(CategoryScale, LinearScale, BarElement, BarController, Title, Tooltip, Legend)
 
-defineProps({
+const props = defineProps({
   open: {
     type: Boolean,
     required: true
@@ -292,8 +292,26 @@ watch(chartData, async () => {
     } else {
       createChart()
     }
+  } else if (!chartData.value && chartInstance) {
+    chartInstance.destroy()
+    chartInstance = null
   }
 }, { deep: true })
+
+
+watch(() => props.open, async (newVal) => {
+  if (newVal && chartData.value) {
+    await nextTick()
+    if (chartInstance) {
+      updateChart()
+    } else {
+      createChart()
+    }
+  } else if (!newVal && chartInstance) {
+    chartInstance.destroy()
+    chartInstance = null
+  }
+})
 
 onMounted(() => {
   // Select first two tilesets by default for comparison
