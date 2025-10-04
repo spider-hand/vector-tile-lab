@@ -1,0 +1,46 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-client:
+    runs-on: ubuntu-latest
+    name: Build Client Docker Image
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build client Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./client
+        file: ./client/Dockerfile
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  build-server:
+    runs-on: ubuntu-latest
+    name: Build Server Docker Image
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build server Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./server
+        file: ./server/Dockerfile
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
