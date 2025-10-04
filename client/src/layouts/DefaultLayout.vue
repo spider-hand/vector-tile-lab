@@ -28,6 +28,7 @@
     <TilesetSidebar :open="tilesetSidebarOpen" @update:open="handleMenuClick('Tilesets')" />
     <MetadataSidebar :open="metadataSidebarOpen" @update:open="handleMenuClick('Metadata')" />
     <PerformanceSidebar :open="performanceSidebarOpen" @update:open="handleMenuClick('Performance')" />
+    <ComparisonSidebar :open="comparisonSidebarOpen" @update:open="handleMenuClick('Comparison')" />
   </SidebarProvider>
 </template>
 
@@ -44,16 +45,18 @@ import SidebarProvider from '@/components/ui/sidebar/SidebarProvider.vue';
 import UploadSidebar from '@/components/UploadSidebar.vue';
 import MetadataSidebar from '@/components/MetadataSidebar.vue';
 import PerformanceSidebar from '@/components/PerformanceSidebar.vue';
-import { ChartSpline, FileText, Layers, Upload } from 'lucide-vue-next';
+import { ChartNoAxesColumn, ChartSpline, FileText, Layers, Upload } from 'lucide-vue-next';
 import TilesetSidebar from '@/components/TilesetSidebar.vue';
+import ComparisonSidebar from '@/components/ComparisonSidebar.vue';
 
-type MenuItem = 'Upload' | 'Tilesets' | 'Metadata' | 'Performance';
+type MenuItem = 'Upload' | 'Tilesets' | 'Metadata' | 'Performance' | 'Comparison';
 
 const items: Array<{ title: MenuItem; icon: Component }> = [
   { title: 'Upload', icon: Upload },
   { title: 'Tilesets', icon: Layers },
   { title: 'Metadata', icon: FileText },
-  { title: 'Performance', icon: ChartSpline }
+  { title: 'Performance', icon: ChartSpline },
+  { title: 'Comparison', icon: ChartNoAxesColumn }
 ]
 
 const activeItem = ref<MenuItem | null>(null)
@@ -61,6 +64,7 @@ const uploadSidebarOpen = computed(() => activeItem.value === 'Upload')
 const tilesetSidebarOpen = computed(() => activeItem.value === 'Tilesets')
 const metadataSidebarOpen = computed(() => activeItem.value === 'Metadata')
 const performanceSidebarOpen = computed(() => activeItem.value === 'Performance')
+const comparisonSidebarOpen = computed(() => activeItem.value === 'Comparison')
 
 function handleMenuClick(title: MenuItem) {
   if (activeItem.value === title) {

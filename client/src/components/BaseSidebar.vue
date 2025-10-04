@@ -1,12 +1,12 @@
 <template>
   <Sheet :open="open" @update:open="(value: boolean) => $emit('update:open', value)" :modal="false">
-    <SheetContent side="left" class="w-80 flex flex-col" :style="{ marginLeft: sidebarMargin }"
+    <SheetContent side="left" class="flex flex-col" :class="width" :style="{ marginLeft: sidebarMargin }"
       @interact-outside="(e) => e.preventDefault()">
       <SheetHeader>
         <SheetTitle>{{ title }}</SheetTitle>
         <SheetDescription>{{ description }}</SheetDescription>
       </SheetHeader>
-      
+
       <div class="flex flex-col flex-1 min-h-0 rounded-lg px-4 pb-4 overflow-y-auto sidebar-scrollbar">
         <slot />
       </div>
@@ -31,6 +31,10 @@ defineProps({
   description: {
     type: String,
     required: true
+  },
+  width: {
+    type: String,
+    default: 'w-80'
   }
 })
 
