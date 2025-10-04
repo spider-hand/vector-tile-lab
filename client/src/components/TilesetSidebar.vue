@@ -167,7 +167,6 @@ const handleGenerate = () => {
       onSuccess: (data) => {
         createdTilesetId.value = data.id
         showProgress.value = true
-        console.log('Tileset generation started:', data)
       },
       onError: (error) => {
         console.error('Error generating tileset:', error)
