@@ -26,7 +26,7 @@ FROM python:3.13-slim-bookworm
 
 # Install Tippecanoe build dependencies
 RUN apt-get update && \
-    apt-get -y install gcc g++ make libsqlite3-dev zlib1g-dev git \
+    apt-get -y install gcc g++ make libsqlite3-dev zlib1g-dev git gdal-bin \
     && rm -rf /var/lib/apt/lists/*
 
 # Build Tippecanoe from source

@@ -7,7 +7,11 @@ from .models import Dataset, Tileset
 from .serializers import DatasetSerializer, TilesetSerializer
 from .filters import TilesetFilter
 from drf_spectacular.utils import extend_schema
-from .tasks import process_uploaded_geojson, generate_tileset_with_options
+from .tasks import (
+    process_uploaded_geojson,
+    process_uploaded_shapefile,
+    generate_tileset_with_options,
+)
 import redis
 from .constants import TaskStatus
 from .utils import s3_service
@@ -31,8 +35,13 @@ class DatasetViewSet(
                 "properties": {
                     "name": {"type": "string"},
                     "geojson_file": {"type": "string", "format": "binary"},
+                    "shp_file": {"type": "string", "format": "binary"},
+                    "shx_file": {"type": "string", "format": "binary"},
+                    "dbf_file": {"type": "string", "format": "binary"},
+                    "prj_file": {"type": "string", "format": "binary"},
+                    "cpg_file": {"type": "string", "format": "binary"},
                 },
-                "required": ["name", "geojson_file"],
+                "required": ["name"],
             }
         }
     )
@@ -47,7 +56,12 @@ class DatasetViewSet(
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        process_uploaded_geojson.delay(instance.id, instance.name)
+
+        if instance.shp_file:
+            process_uploaded_shapefile.delay(instance.id, instance.name)
+        else:
+            process_uploaded_geojson.delay(instance.id, instance.name)
+
         return instance
 
     def destroy(self, request, *args, **kwargs):

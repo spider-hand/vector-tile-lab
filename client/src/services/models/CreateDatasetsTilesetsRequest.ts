@@ -63,10 +63,15 @@ export function CreateDatasetsTilesetsRequestFromJSONTyped(json: any, ignoreDisc
     };
 }
 
-export function CreateDatasetsTilesetsRequestToJSON(value?: CreateDatasetsTilesetsRequest | null): any {
+export function CreateDatasetsTilesetsRequestToJSON(json: any): CreateDatasetsTilesetsRequest {
+    return CreateDatasetsTilesetsRequestToJSONTyped(json, false);
+}
+
+export function CreateDatasetsTilesetsRequestToJSONTyped(value?: CreateDatasetsTilesetsRequest | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'name': value['name'],

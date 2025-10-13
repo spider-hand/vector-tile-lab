@@ -18,6 +18,7 @@ import {
     StatusEnumFromJSON,
     StatusEnumFromJSONTyped,
     StatusEnumToJSON,
+    StatusEnumToJSONTyped,
 } from './StatusEnum';
 
 /**
@@ -122,10 +123,15 @@ export function TilesetFromJSONTyped(json: any, ignoreDiscriminator: boolean): T
     };
 }
 
-export function TilesetToJSON(value?: Omit<Tileset, 'id'|'dataset'|'dataset_name'|'name'|'pmtiles_file'|'status'|'metadata'|'created_at'|'updated_at'> | null): any {
+export function TilesetToJSON(json: any): Tileset {
+    return TilesetToJSONTyped(json, false);
+}
+
+export function TilesetToJSONTyped(value?: Omit<Tileset, 'id'|'dataset'|'dataset_name'|'name'|'pmtiles_file'|'status'|'metadata'|'created_at'|'updated_at'> | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
     };

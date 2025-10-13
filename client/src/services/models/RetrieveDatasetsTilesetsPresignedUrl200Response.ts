@@ -57,10 +57,15 @@ export function RetrieveDatasetsTilesetsPresignedUrl200ResponseFromJSONTyped(jso
     };
 }
 
-export function RetrieveDatasetsTilesetsPresignedUrl200ResponseToJSON(value?: RetrieveDatasetsTilesetsPresignedUrl200Response | null): any {
+export function RetrieveDatasetsTilesetsPresignedUrl200ResponseToJSON(json: any): RetrieveDatasetsTilesetsPresignedUrl200Response {
+    return RetrieveDatasetsTilesetsPresignedUrl200ResponseToJSONTyped(json, false);
+}
+
+export function RetrieveDatasetsTilesetsPresignedUrl200ResponseToJSONTyped(value?: RetrieveDatasetsTilesetsPresignedUrl200Response | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'presigned_url': value['presignedUrl'],

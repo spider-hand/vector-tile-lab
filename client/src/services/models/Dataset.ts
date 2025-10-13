@@ -36,7 +36,37 @@ export interface Dataset {
      * @type {string}
      * @memberof Dataset
      */
-    geojsonFile: string;
+    geojsonFile?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Dataset
+     */
+    shpFile?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Dataset
+     */
+    shxFile?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Dataset
+     */
+    dbfFile?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Dataset
+     */
+    prjFile?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Dataset
+     */
+    cpgFile?: string;
     /**
      * 
      * @type {Date}
@@ -57,7 +87,6 @@ export interface Dataset {
 export function instanceOfDataset(value: object): value is Dataset {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
-    if (!('geojsonFile' in value) || value['geojsonFile'] === undefined) return false;
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
@@ -75,20 +104,35 @@ export function DatasetFromJSONTyped(json: any, ignoreDiscriminator: boolean): D
         
         'id': json['id'],
         'name': json['name'],
-        'geojsonFile': json['geojson_file'],
+        'geojsonFile': json['geojson_file'] == null ? undefined : json['geojson_file'],
+        'shpFile': json['shp_file'] == null ? undefined : json['shp_file'],
+        'shxFile': json['shx_file'] == null ? undefined : json['shx_file'],
+        'dbfFile': json['dbf_file'] == null ? undefined : json['dbf_file'],
+        'prjFile': json['prj_file'] == null ? undefined : json['prj_file'],
+        'cpgFile': json['cpg_file'] == null ? undefined : json['cpg_file'],
         'createdAt': (new Date(json['created_at'])),
         'updatedAt': (new Date(json['updated_at'])),
     };
 }
 
-export function DatasetToJSON(value?: Omit<Dataset, 'id'|'created_at'|'updated_at'> | null): any {
+export function DatasetToJSON(json: any): Dataset {
+    return DatasetToJSONTyped(json, false);
+}
+
+export function DatasetToJSONTyped(value?: Omit<Dataset, 'id'|'created_at'|'updated_at'> | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'name': value['name'],
         'geojson_file': value['geojsonFile'],
+        'shp_file': value['shpFile'],
+        'shx_file': value['shxFile'],
+        'dbf_file': value['dbfFile'],
+        'prj_file': value['prjFile'],
+        'cpg_file': value['cpgFile'],
     };
 }
 
