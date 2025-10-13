@@ -48,10 +48,15 @@ export function CreateDatasetsTilesets400ResponseFromJSONTyped(json: any, ignore
     };
 }
 
-export function CreateDatasetsTilesets400ResponseToJSON(value?: CreateDatasetsTilesets400Response | null): any {
+export function CreateDatasetsTilesets400ResponseToJSON(json: any): CreateDatasetsTilesets400Response {
+    return CreateDatasetsTilesets400ResponseToJSONTyped(json, false);
+}
+
+export function CreateDatasetsTilesets400ResponseToJSONTyped(value?: CreateDatasetsTilesets400Response | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'error': value['error'],

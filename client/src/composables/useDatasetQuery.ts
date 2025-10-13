@@ -53,8 +53,24 @@ export const useDatasetQuery = (
     isPending: isCreatingDataset,
     isSuccess: isCreateDatasetSuccess,
   } = useMutation({
-    mutationFn: async ({ name, file }: { name: string; file: File }) => {
-      return await datasetsApi.createDatasets({ name, geojsonFile: file })
+    mutationFn: async (params: { 
+      name: string
+      geojsonFile?: File
+      shpFile?: File
+      shxFile?: File
+      dbfFile?: File
+      prjFile?: File
+      cpgFile?: File
+    }) => {
+      return await datasetsApi.createDatasets({
+        name: params.name,
+        geojsonFile: params.geojsonFile,
+        shpFile: params.shpFile,
+        shxFile: params.shxFile,
+        dbfFile: params.dbfFile,
+        prjFile: params.prjFile,
+        cpgFile: params.cpgFile,
+      })
     },
   })
 

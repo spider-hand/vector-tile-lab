@@ -1,4 +1,6 @@
 import subprocess
+import os
+import shutil
 from celery import shared_task
 import re
 import redis
@@ -230,6 +232,124 @@ def generate_tileset_with_options(
 
 
 @shared_task
+def process_uploaded_shapefile(dataset_id, dataset_name):
+    """
+    Process uploaded shapefile components by converting them to GeoJSON,
+    then calling the existing GeoJSON processing workflow.
+    """
+    print(f"Start to process shapefile {dataset_name} ...")
+
+    try:
+        dataset = Dataset.objects.get(id=dataset_id)
+    except Dataset.DoesNotExist:
+        print(f"Dataset with id {dataset_id} does not exist")
+        return
+
+    redis_client = get_redis_client()
+    redis_key = f"dataset:{dataset_id}"
+
+    redis_client.hset(
+        redis_key,
+        mapping={
+            "status": TaskStatus.IN_PROGRESS,
+            "progress": 0,
+        },
+    )
+
+    temp_dir = f"/tmp/shapefile_{dataset_id}"
+    os.makedirs(temp_dir, exist_ok=True)
+
+    try:
+        shapefile_components = {
+            "shp": dataset.shp_file,
+            "shx": dataset.shx_file,
+            "dbf": dataset.dbf_file,
+            "prj": dataset.prj_file,
+            "cpg": dataset.cpg_file,
+        }
+
+        downloaded_files = {}
+
+        for ext, file_field in shapefile_components.items():
+            if file_field:
+                object_name = file_field.name
+                local_path = os.path.join(temp_dir, f"{dataset_name}.{ext}")
+
+                try:
+                    s3_service.internal_client.download_file(
+                        s3_service.bucket_name, object_name, local_path
+                    )
+                    downloaded_files[ext] = local_path
+                except Exception as e:
+                    print(f"Failed to download {object_name}: {e}")
+                    if ext in ["shp", "shx", "dbf"]:
+                        raise e
+
+        # Convert shapefile to GeoJSON
+        shp_path = downloaded_files["shp"]
+        geojson_path = f"/tmp/{dataset_name}.geojson"
+
+        print("Converting shapefile to GeoJSON ...")
+
+        ogr2ogr_cmd = ["ogr2ogr", "-f", "GeoJSON", geojson_path, shp_path]
+
+        result = subprocess.run(
+            ogr2ogr_cmd,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+
+        if result.returncode != 0:
+            raise Exception(f"ogr2ogr failed: {result.stderr}")
+
+        print("Successfully converted shapefile to GeoJSON")
+
+        print("Uploading converted GeoJSON to MinIO ...")
+
+        # Upload the converted GeoJSON to MinIO
+        geojson_object_name = f"datasets/geojson/{dataset_name}.geojson"
+
+        try:
+            s3_service.internal_client.upload_file(
+                geojson_path, s3_service.bucket_name, geojson_object_name
+            )
+            print("Uploaded converted GeoJSON to MinIO")
+
+            dataset.geojson_file.name = geojson_object_name
+            dataset.save()
+
+        except Exception as e:
+            raise Exception(f"Failed to upload converted GeoJSON to MinIO: {e}")
+
+        # Clean up temporary files
+        try:
+            shutil.rmtree(temp_dir)
+            os.remove(geojson_path)
+        except Exception as e:
+            print(f"Warning: Failed to clean up temporary files: {e}")
+
+        process_uploaded_geojson.delay(dataset_id, dataset_name)
+
+    except Exception as e:
+        print(f"Error processing shapefile: {e}")
+        redis_client.hset(
+            redis_key,
+            mapping={
+                "status": TaskStatus.FAILED,
+                "progress": 0,
+            },
+        )
+
+        # Clean up on error
+        try:
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
+        except Exception as cleanup_error:
+            print(f"Failed to clean up after error: {cleanup_error}")
+
+
+@shared_task
 def process_uploaded_geojson(dataset_id, dataset_name):
     print(f"Start to process {dataset_name} ...")
 
@@ -245,8 +365,8 @@ def process_uploaded_geojson(dataset_id, dataset_name):
     print(f"Created Tileset with id {tileset.id}")
 
     redis_client = get_redis_client()
-
     redis_key = f"dataset:{dataset_id}"
+
     geojson_object_name = f"datasets/geojson/{dataset_name}.geojson"
     local_geojson_path = f"/tmp/{dataset_name}.geojson"
     local_pmtiles_path = f"/tmp/{dataset_name}.pmtiles"

@@ -4,7 +4,15 @@ from .constants import TASK_STATUS_CHOICES
 
 class Dataset(models.Model):
     name = models.CharField(max_length=255)
-    geojson_file = models.FileField(upload_to="datasets/geojson/")
+    geojson_file = models.FileField(
+        upload_to="datasets/geojson/", null=True, blank=True
+    )
+
+    shp_file = models.FileField(upload_to="datasets/shapefile/", null=True, blank=True)
+    shx_file = models.FileField(upload_to="datasets/shapefile/", null=True, blank=True)
+    dbf_file = models.FileField(upload_to="datasets/shapefile/", null=True, blank=True)
+    prj_file = models.FileField(upload_to="datasets/shapefile/", null=True, blank=True)
+    cpg_file = models.FileField(upload_to="datasets/shapefile/", null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -50,3 +50,7 @@ export function StatusEnumToJSON(value?: StatusEnum | null): any {
     return value as any;
 }
 
+export function StatusEnumToJSONTyped(value: any, ignoreDiscriminator: boolean): StatusEnum {
+    return value as StatusEnum;
+}
+

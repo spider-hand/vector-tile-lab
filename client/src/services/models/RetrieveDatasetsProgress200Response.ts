@@ -85,10 +85,15 @@ export function RetrieveDatasetsProgress200ResponseFromJSONTyped(json: any, igno
     };
 }
 
-export function RetrieveDatasetsProgress200ResponseToJSON(value?: RetrieveDatasetsProgress200Response | null): any {
+export function RetrieveDatasetsProgress200ResponseToJSON(json: any): RetrieveDatasetsProgress200Response {
+    return RetrieveDatasetsProgress200ResponseToJSONTyped(json, false);
+}
+
+export function RetrieveDatasetsProgress200ResponseToJSONTyped(value?: RetrieveDatasetsProgress200Response | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'dataset_id': value['datasetId'],

@@ -42,7 +42,12 @@ import {
 
 export interface CreateDatasetsRequest {
     name: string;
-    geojsonFile: Blob;
+    geojsonFile?: Blob;
+    shpFile?: Blob;
+    shxFile?: Blob;
+    dbfFile?: Blob;
+    prjFile?: Blob;
+    cpgFile?: Blob;
 }
 
 export interface CreateDatasetsTilesetsOperationRequest {
@@ -102,13 +107,6 @@ export class DatasetsApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['geojsonFile'] == null) {
-            throw new runtime.RequiredError(
-                'geojsonFile',
-                'Required parameter "geojsonFile" was null or undefined when calling createDatasets().'
-            );
-        }
-
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -126,6 +124,16 @@ export class DatasetsApi extends runtime.BaseAPI {
         let useForm = false;
         // use FormData to transmit files using content-type "multipart/form-data"
         useForm = canConsumeForm;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
         if (useForm) {
             formParams = new FormData();
         } else {
@@ -140,8 +148,31 @@ export class DatasetsApi extends runtime.BaseAPI {
             formParams.append('geojson_file', requestParameters['geojsonFile'] as any);
         }
 
+        if (requestParameters['shpFile'] != null) {
+            formParams.append('shp_file', requestParameters['shpFile'] as any);
+        }
+
+        if (requestParameters['shxFile'] != null) {
+            formParams.append('shx_file', requestParameters['shxFile'] as any);
+        }
+
+        if (requestParameters['dbfFile'] != null) {
+            formParams.append('dbf_file', requestParameters['dbfFile'] as any);
+        }
+
+        if (requestParameters['prjFile'] != null) {
+            formParams.append('prj_file', requestParameters['prjFile'] as any);
+        }
+
+        if (requestParameters['cpgFile'] != null) {
+            formParams.append('cpg_file', requestParameters['cpgFile'] as any);
+        }
+
+
+        let urlPath = `/api/v1/datasets/`;
+
         const response = await this.request({
-            path: `/api/v1/datasets/`,
+            path: urlPath,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -178,8 +209,12 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/{datasetId}/tilesets/`;
+        urlPath = urlPath.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId'])));
+
         const response = await this.request({
-            path: `/api/v1/datasets/{datasetId}/tilesets/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))),
+            path: urlPath,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
@@ -214,8 +249,12 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/{id}/`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/datasets/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
@@ -254,8 +293,13 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/{datasetId}/tilesets/{id}/`;
+        urlPath = urlPath.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId'])));
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/datasets/{datasetId}/tilesets/{id}/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))).replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
@@ -280,8 +324,11 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/`;
+
         const response = await this.request({
-            path: `/api/v1/datasets/`,
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -318,8 +365,12 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/{datasetId}/tilesets/`;
+        urlPath = urlPath.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId'])));
+
         const response = await this.request({
-            path: `/api/v1/datasets/{datasetId}/tilesets/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))),
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -352,8 +403,12 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/{id}/`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/datasets/{id}/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -388,8 +443,12 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/{id}/progress/`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/datasets/{id}/progress/`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -431,8 +490,13 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/{datasetId}/tilesets/{id}/`;
+        urlPath = urlPath.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId'])));
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/datasets/{datasetId}/tilesets/{id}/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))).replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -474,8 +538,13 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/{datasetId}/tilesets/{id}/presigned_url/`;
+        urlPath = urlPath.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId'])));
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/datasets/{datasetId}/tilesets/{id}/presigned_url/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))).replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -519,8 +588,13 @@ export class DatasetsApi extends runtime.BaseAPI {
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
+
+        let urlPath = `/api/v1/datasets/{datasetId}/tilesets/{id}/progress/`;
+        urlPath = urlPath.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId'])));
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
         const response = await this.request({
-            path: `/api/v1/datasets/{datasetId}/tilesets/{id}/progress/`.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId']))).replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,

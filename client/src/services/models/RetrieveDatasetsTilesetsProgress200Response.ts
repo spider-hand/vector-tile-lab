@@ -85,10 +85,15 @@ export function RetrieveDatasetsTilesetsProgress200ResponseFromJSONTyped(json: a
     };
 }
 
-export function RetrieveDatasetsTilesetsProgress200ResponseToJSON(value?: RetrieveDatasetsTilesetsProgress200Response | null): any {
+export function RetrieveDatasetsTilesetsProgress200ResponseToJSON(json: any): RetrieveDatasetsTilesetsProgress200Response {
+    return RetrieveDatasetsTilesetsProgress200ResponseToJSONTyped(json, false);
+}
+
+export function RetrieveDatasetsTilesetsProgress200ResponseToJSONTyped(value?: RetrieveDatasetsTilesetsProgress200Response | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
+
     return {
         
         'tileset_id': value['tilesetId'],

@@ -37,9 +37,23 @@ paths:
                 geojson_file:
                   type: string
                   format: binary
+                shp_file:
+                  type: string
+                  format: binary
+                shx_file:
+                  type: string
+                  format: binary
+                dbf_file:
+                  type: string
+                  format: binary
+                prj_file:
+                  type: string
+                  format: binary
+                cpg_file:
+                  type: string
+                  format: binary
               required:
               - name
-              - geojson_file
       security:
       - cookieAuth: []
       - basicAuth: []
@@ -422,6 +436,27 @@ components:
         geojson_file:
           type: string
           format: uri
+          nullable: true
+        shp_file:
+          type: string
+          format: uri
+          nullable: true
+        shx_file:
+          type: string
+          format: uri
+          nullable: true
+        dbf_file:
+          type: string
+          format: uri
+          nullable: true
+        prj_file:
+          type: string
+          format: uri
+          nullable: true
+        cpg_file:
+          type: string
+          format: uri
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -432,7 +467,6 @@ components:
           readOnly: true
       required:
       - created_at
-      - geojson_file
       - id
       - name
       - updated_at
