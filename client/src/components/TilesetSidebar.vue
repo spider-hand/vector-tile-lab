@@ -10,7 +10,7 @@
         <div class="flex flex-col gap-3 p-4 border rounded-lg">
           <div class="flex flex-col gap-1">
             <label class="text-xs font-medium">Maximum Zoom</label>
-            <Select v-model="maxZoom">
+            <Select v-model="maximumZoom">
               <SelectTrigger class="h-8">
                 <SelectValue placeholder="Select maximum zoom" />
               </SelectTrigger>
@@ -25,7 +25,15 @@
           </div>
           <div class="flex items-center justify-between">
             <label class="text-xs font-medium">Drop densest as needed</label>
-            <Switch :model-value="dropDensest" @update:model-value="dropDensest = $event" />
+            <Switch :model-value="dropDensestAsNeeded" @update:model-value="dropDensestAsNeeded = $event" />
+          </div>
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-medium">Coalesce densest as needed</label>
+            <Switch :model-value="coalesceDensestAsNeeded" @update:model-value="coalesceDensestAsNeeded = $event" />
+          </div>
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-medium">Extend zooms if still dropping</label>
+            <Switch :model-value="extendZoomsIfStillDropping" @update:model-value="extendZoomsIfStillDropping = $event" />
           </div>
           <Button @click="handleGenerate" :disabled="!dataset || isCreatingTileset || showProgress" class="h-8">
             <LoaderCircle v-if="isCreatingTileset" class="h-3 w-3 animate-spin mr-2" />
@@ -133,8 +141,10 @@ const {
   refetchTilesets
 } = useTilesetQuery(selectedDatasetId, selectedTilesetId, createdTilesetId)
 
-const maxZoom = ref<string>('g')
-const dropDensest = ref<boolean>(true)
+const maximumZoom = ref<string>('g')
+const dropDensestAsNeeded = ref<boolean>(true)
+const coalesceDensestAsNeeded = ref<boolean>(false)
+const extendZoomsIfStillDropping = ref<boolean>(false)
 
 const { status, progressColors, progressTitle, progressDescription, progressPercentage } = useProgress(
   progress,
@@ -160,8 +170,10 @@ const handleGenerate = () => {
   mutateOnCreateTileset(
     {
       name: tilesetName,
-      maxZoom: maxZoom.value,
-      dropDensest: dropDensest.value
+      maximumZoom: maximumZoom.value,
+      dropDensestAsNeeded: dropDensestAsNeeded.value,
+      coalesceDensestAsNeeded: coalesceDensestAsNeeded.value,
+      extendZoomsIfStillDropping: extendZoomsIfStillDropping.value
     },
     {
       onSuccess: (data) => {

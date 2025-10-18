@@ -142,8 +142,10 @@ def generate_tileset_with_options(
     dataset_name,
     tileset_id,
     tileset_name,
-    max_zoom="g",
-    drop_densest=True,
+    maximum_zoom="g",
+    drop_densest_as_needed=True,
+    coalesce_densest_as_needed=False,
+    extend_zooms_if_still_dropping=False,
 ):
     print(f"Start to generate tileset '{tileset_name}' ...")
 
@@ -181,12 +183,16 @@ def generate_tileset_with_options(
 
     # Prepare tippecanoe options
     print(
-        f"Running tippecanoe for {tileset_name} with options: --maximum_zoom={max_zoom}, --drop-densest-as-needed={drop_densest}"
+        f"Running tippecanoe for {tileset_name} with options: --maximum-zoom={maximum_zoom}, --drop-densest-as-needed={drop_densest_as_needed}, --coalesce-densest-as-needed={coalesce_densest_as_needed}, --extend-zooms-if-still-dropping={extend_zooms_if_still_dropping}"
     )
 
-    additional_options = ["--maximum-zoom", str(max_zoom)]
-    if drop_densest:
+    additional_options = ["--maximum-zoom", str(maximum_zoom)]
+    if drop_densest_as_needed:
         additional_options.append("--drop-densest-as-needed")
+    if coalesce_densest_as_needed:
+        additional_options.append("--coalesce-densest-as-needed")
+    if extend_zooms_if_still_dropping:
+        additional_options.append("--extend-zooms-if-still-dropping")
 
     # Run tippecanoe with progress tracking
     success = run_tippecanoe_with_progress(

@@ -121,14 +121,22 @@ paths:
                 name:
                   type: string
                   description: Name for the new tileset
-                max_zoom:
+                maximum_zoom:
                   type: string
                   description: Maximum zoom level (0-22 or 'g' for guess)
                   default: g
-                drop_densest:
+                drop_densest_as_needed:
                   type: boolean
                   description: Whether to drop densest as needed
                   default: true
+                coalesce_densest_as_needed:
+                  type: boolean
+                  description: Whether to coalesce densest as needed
+                  default: false
+                extend_zooms_if_still_dropping:
+                  type: boolean
+                  description: Whether to extend zooms if still dropping
+                  default: false
               required:
               - name
       security:

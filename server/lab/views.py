@@ -147,15 +147,25 @@ class TilesetViewSet(
                         "type": "string",
                         "description": "Name for the new tileset",
                     },
-                    "max_zoom": {
+                    "maximum_zoom": {
                         "type": "string",
                         "description": "Maximum zoom level (0-22 or 'g' for guess)",
                         "default": "g",
                     },
-                    "drop_densest": {
+                    "drop_densest_as_needed": {
                         "type": "boolean",
                         "description": "Whether to drop densest as needed",
                         "default": True,
+                    },
+                    "coalesce_densest_as_needed": {
+                        "type": "boolean",
+                        "description": "Whether to coalesce densest as needed",
+                        "default": False,
+                    },
+                    "extend_zooms_if_still_dropping": {
+                        "type": "boolean",
+                        "description": "Whether to extend zooms if still dropping",
+                        "default": False,
                     },
                 },
                 "required": ["name"],
@@ -185,8 +195,14 @@ class TilesetViewSet(
             )
 
         name = request.data.get("name")
-        max_zoom = request.data.get("max_zoom", "g")
-        drop_densest = request.data.get("drop_densest", True)
+        maximum_zoom = request.data.get("maximum_zoom", "g")
+        drop_densest_as_needed = request.data.get("drop_densest_as_needed", True)
+        coalesce_densest_as_needed = request.data.get(
+            "coalesce_densest_as_needed", False
+        )
+        extend_zooms_if_still_dropping = request.data.get(
+            "extend_zooms_if_still_dropping", False
+        )
 
         if not name:
             return Response(
@@ -194,17 +210,17 @@ class TilesetViewSet(
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if max_zoom != "g":
+        if maximum_zoom != "g":
             try:
-                zoom_int = int(max_zoom)
+                zoom_int = int(maximum_zoom)
                 if zoom_int < 0 or zoom_int > 22:
                     return Response(
-                        {"error": "max_zoom must be between 0-22 or 'g'"},
+                        {"error": "maximum_zoom must be between 0-22 or 'g'"},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
             except ValueError:
                 return Response(
-                    {"error": "max_zoom must be a number between 0-22 or 'g'"},
+                    {"error": "maximum_zoom must be a number between 0-22 or 'g'"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -219,8 +235,10 @@ class TilesetViewSet(
             dataset.name,
             tileset.id,
             name,
-            max_zoom,
-            drop_densest,
+            maximum_zoom,
+            drop_densest_as_needed,
+            coalesce_densest_as_needed,
+            extend_zooms_if_still_dropping,
         )
 
         serializer = self.get_serializer(tileset)

@@ -101,12 +101,16 @@ export const useTilesetQuery = (
   } = useMutation({
     mutationFn: async ({
       name,
-      maxZoom,
-      dropDensest,
+      maximumZoom,
+      dropDensestAsNeeded,
+      coalesceDensestAsNeeded,
+      extendZoomsIfStillDropping,
     }: {
       name: string
-      maxZoom: string
-      dropDensest: boolean
+      maximumZoom: string
+      dropDensestAsNeeded: boolean
+      coalesceDensestAsNeeded: boolean
+      extendZoomsIfStillDropping: boolean
     }) => {
       const datasetIdValue = toValue(datasetId)
       if (!datasetIdValue) throw new Error('Dataset ID is required')
@@ -115,8 +119,10 @@ export const useTilesetQuery = (
         datasetId: datasetIdValue,
         createDatasetsTilesetsRequest: {
           name,
-          maxZoom,
-          dropDensest,
+          maximumZoom,
+          dropDensestAsNeeded,
+          coalesceDensestAsNeeded,
+          extendZoomsIfStillDropping,
         },
       })
     },

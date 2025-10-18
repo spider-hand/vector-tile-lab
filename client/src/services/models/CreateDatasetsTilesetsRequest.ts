@@ -30,13 +30,25 @@ export interface CreateDatasetsTilesetsRequest {
      * @type {string}
      * @memberof CreateDatasetsTilesetsRequest
      */
-    maxZoom?: string;
+    maximumZoom?: string;
     /**
      * Whether to drop densest as needed
      * @type {boolean}
      * @memberof CreateDatasetsTilesetsRequest
      */
-    dropDensest?: boolean;
+    dropDensestAsNeeded?: boolean;
+    /**
+     * Whether to coalesce densest as needed
+     * @type {boolean}
+     * @memberof CreateDatasetsTilesetsRequest
+     */
+    coalesceDensestAsNeeded?: boolean;
+    /**
+     * Whether to extend zooms if still dropping
+     * @type {boolean}
+     * @memberof CreateDatasetsTilesetsRequest
+     */
+    extendZoomsIfStillDropping?: boolean;
 }
 
 /**
@@ -58,8 +70,10 @@ export function CreateDatasetsTilesetsRequestFromJSONTyped(json: any, ignoreDisc
     return {
         
         'name': json['name'],
-        'maxZoom': json['max_zoom'] == null ? undefined : json['max_zoom'],
-        'dropDensest': json['drop_densest'] == null ? undefined : json['drop_densest'],
+        'maximumZoom': json['maximum_zoom'] == null ? undefined : json['maximum_zoom'],
+        'dropDensestAsNeeded': json['drop_densest_as_needed'] == null ? undefined : json['drop_densest_as_needed'],
+        'coalesceDensestAsNeeded': json['coalesce_densest_as_needed'] == null ? undefined : json['coalesce_densest_as_needed'],
+        'extendZoomsIfStillDropping': json['extend_zooms_if_still_dropping'] == null ? undefined : json['extend_zooms_if_still_dropping'],
     };
 }
 
@@ -75,8 +89,10 @@ export function CreateDatasetsTilesetsRequestToJSONTyped(value?: CreateDatasetsT
     return {
         
         'name': value['name'],
-        'max_zoom': value['maxZoom'],
-        'drop_densest': value['dropDensest'],
+        'maximum_zoom': value['maximumZoom'],
+        'drop_densest_as_needed': value['dropDensestAsNeeded'],
+        'coalesce_densest_as_needed': value['coalesceDensestAsNeeded'],
+        'extend_zooms_if_still_dropping': value['extendZoomsIfStillDropping'],
     };
 }
 

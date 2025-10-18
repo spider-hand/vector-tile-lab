@@ -36,37 +36,37 @@ export interface Dataset {
      * @type {string}
      * @memberof Dataset
      */
-    geojsonFile?: string;
+    geojsonFile?: string | null;
     /**
      * 
      * @type {string}
      * @memberof Dataset
      */
-    shpFile?: string;
+    shpFile?: string | null;
     /**
      * 
      * @type {string}
      * @memberof Dataset
      */
-    shxFile?: string;
+    shxFile?: string | null;
     /**
      * 
      * @type {string}
      * @memberof Dataset
      */
-    dbfFile?: string;
+    dbfFile?: string | null;
     /**
      * 
      * @type {string}
      * @memberof Dataset
      */
-    prjFile?: string;
+    prjFile?: string | null;
     /**
      * 
      * @type {string}
      * @memberof Dataset
      */
-    cpgFile?: string;
+    cpgFile?: string | null;
     /**
      * 
      * @type {Date}
