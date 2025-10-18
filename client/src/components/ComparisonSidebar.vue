@@ -84,8 +84,9 @@ import {
   Chart,
   CategoryScale,
   LinearScale,
-  BarElement,
-  BarController,
+  LineElement,
+  PointElement,
+  LineController,
   Title,
   Tooltip,
   Legend,
@@ -94,7 +95,7 @@ import {
 import { calculateTilesAtZoom } from '@/utils'
 import type { Tileset } from '@/services'
 
-Chart.register(CategoryScale, LinearScale, BarElement, BarController, Title, Tooltip, Legend)
+Chart.register(CategoryScale, LinearScale, LineElement, PointElement, LineController, Title, Tooltip, Legend)
 
 const props = defineProps({
   open: {
@@ -194,12 +195,14 @@ const chartData = computed(() => {
         return found ? found.tiles : 0
       })
 
+      const currentColor = chartColors[index % chartColors.length]
+
       return {
         label: data.name,
         data: zoomData,
-        backgroundColor: chartColors[index % chartColors.length],
-        borderColor: chartColors[index % chartColors.length],
-        borderWidth: 1
+        borderColor: currentColor,
+        borderWidth: 2,
+        pointBackgroundColor: currentColor,
       }
     })
     .filter((dataset): dataset is NonNullable<typeof dataset> => Boolean(dataset))
@@ -210,8 +213,8 @@ const chartData = computed(() => {
   }
 })
 
-const chartConfig = computed<ChartConfiguration<'bar'>>(() => ({
-  type: 'bar',
+const chartConfig = computed<ChartConfiguration<'line'>>(() => ({
+  type: 'line',
   data: chartData.value!,
   options: {
     responsive: true,
@@ -221,7 +224,7 @@ const chartConfig = computed<ChartConfiguration<'bar'>>(() => ({
         display: false,
       },
       legend: {
-        display: false,
+        display: false
       },
       tooltip: {
         callbacks: {
@@ -238,7 +241,7 @@ const chartConfig = computed<ChartConfiguration<'bar'>>(() => ({
         title: {
           display: true,
           text: 'Zoom Level'
-        }
+        },
       },
       y: {
         title: {
@@ -249,9 +252,9 @@ const chartConfig = computed<ChartConfiguration<'bar'>>(() => ({
           callback: (value) => {
             return typeof value === 'number' ? value.toLocaleString() : value
           }
-        }
+        },
       }
-    }
+    },
   }
 }))
 
