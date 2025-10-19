@@ -20,7 +20,7 @@ const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol('pmtiles', protocol.tile);
 
 const { selectedDatasetId, selectedTilesetId } = useSelectedData();
-const { presignedUrl, isFetchingPresignedUrl, tileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
+const { presignedUrl, isFetchingPresignedUrl, tileset, isFetchingTileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
 
 const initializeMap = () => {
   if (!mapRef.value || map.value) return;
@@ -150,14 +150,14 @@ const removePmtilesLayer = () => {
 };
 
 watch(
-  () => presignedUrl.value,
-  (newPresignedUrl) => {
+  [() => presignedUrl.value, () => tileset.value],
+  ([newPresignedUrl, newTileset]) => {
     if (!map.value) {
       initializeMap();
     }
 
-    if (newPresignedUrl?.presignedUrl && !isFetchingPresignedUrl.value && tileset.value) {
-      addPmtilesLayer(newPresignedUrl.presignedUrl, tileset.value.metadata);
+    if (newPresignedUrl?.presignedUrl && !isFetchingPresignedUrl.value && newTileset && !isFetchingTileset.value) {
+      addPmtilesLayer(newPresignedUrl.presignedUrl, newTileset.metadata);
     } else {
       removePmtilesLayer();
     }
@@ -181,7 +181,7 @@ watch(
 onMounted(() => {
   initializeMap();
 
-  if (presignedUrl.value?.presignedUrl && !isFetchingPresignedUrl.value && tileset.value) {
+  if (presignedUrl.value?.presignedUrl && !isFetchingPresignedUrl.value && tileset.value && !isFetchingTileset.value) {
     addPmtilesLayer(presignedUrl.value.presignedUrl, tileset.value.metadata);
   }
 })
