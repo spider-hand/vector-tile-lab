@@ -1,6 +1,6 @@
 # vector-tile-lab
 
-![demo](https://github.com/user-attachments/assets/7d09b3f4-4da0-4ecd-8a4b-8f495f709938)
+![demo](https://github.com/user-attachments/assets/d401ee31-79af-42f3-8142-93486a80a2c9)
 
 [![Docker Build](https://github.com/spider-hand/vector-tile-lab/actions/workflows/docker-build.yml/badge.svg)](https://github.com/spider-hand/vector-tile-lab/actions/workflows/docker-build.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
