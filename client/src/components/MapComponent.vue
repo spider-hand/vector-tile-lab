@@ -11,7 +11,8 @@ import { mapTileMonitor } from '@/utils';
 import * as pmtiles from 'pmtiles';
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
-import type { TileHeader, TileMetadataResponse, VectorLayer } from '@/types';
+import { useLayerStyles } from '@/composables/useLayerStyles';
+import type { LayerType, TileHeader, TileMetadataResponse, VectorLayer } from '@/types';
 
 const mapRef = ref<HTMLElement | null>(null);
 const map = ref<maplibregl.Map | null>(null);
@@ -21,6 +22,7 @@ maplibregl.addProtocol('pmtiles', protocol.tile);
 
 const { selectedDatasetId, selectedTilesetId } = useSelectedData();
 const { presignedUrl, isFetchingPresignedUrl, tileset, isFetchingTileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
+const { layersVisibility, getLayerVisibility } = useLayerStyles();
 
 const initializeMap = () => {
   if (!mapRef.value || map.value) return;
@@ -102,6 +104,9 @@ const addGenericLayer = (sourceLayer: string) => {
     paint: {
       'fill-color': color,
       'fill-opacity': 0.6
+    },
+    layout: {
+      visibility: getLayerVisibility(sourceLayer, 'fill') ? 'visible' : 'none'
     }
   });
 
@@ -114,6 +119,9 @@ const addGenericLayer = (sourceLayer: string) => {
       'line-color': color,
       'line-width': 1,
       'line-opacity': 0.8
+    },
+    layout: {
+      visibility: getLayerVisibility(sourceLayer, 'line') ? 'visible' : 'none'
     }
   });
 
@@ -128,8 +136,27 @@ const addGenericLayer = (sourceLayer: string) => {
       'circle-opacity': 0.8,
       'circle-stroke-color': '#ffffff',
       'circle-stroke-width': 1
+    },
+    layout: {
+      visibility: getLayerVisibility(sourceLayer, 'circle') ? 'visible' : 'none'
     }
   });
+};
+
+const updateLayerVisibility = (sourceLayer: string, layerType: LayerType, visible: boolean) => {
+  if (!map.value) return;
+
+  const layerIdMap = {
+    fill: `${sourceLayer}-fill`,
+    line: `${sourceLayer}-stroke`,
+    circle: `${sourceLayer}-point`
+  };
+
+  const layerId = layerIdMap[layerType];
+
+  if (map.value.getLayer(layerId)) {
+    map.value.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+  }
 };
 
 const removePmtilesLayer = () => {
@@ -176,6 +203,20 @@ watch(
       removePmtilesLayer();
     }
   }
+);
+
+// Watch for layer visibility changes and update map layers accordingly
+watch(
+  () => layersVisibility.value,
+  (newVisibility) => {
+    Object.keys(newVisibility).forEach(sourceLayer => {
+      const layerVisibility = newVisibility[sourceLayer];
+      updateLayerVisibility(sourceLayer, 'fill', layerVisibility.fill);
+      updateLayerVisibility(sourceLayer, 'line', layerVisibility.line);
+      updateLayerVisibility(sourceLayer, 'circle', layerVisibility.circle);
+    });
+  },
+  { deep: true }
 );
 
 onMounted(() => {

@@ -66,3 +66,9 @@ export interface DataStat {
   min?: number
   max?: number
 }
+
+export type LayerType = 'fill' | 'line' | 'circle'
+
+export interface LayerVisibilityState {
+  [layerId: string]: Record<LayerType, boolean>
+}
