@@ -1,5 +1,5 @@
 from django.db import models
-from .constants import TASK_STATUS_CHOICES
+from .constants import TASK_STATUS_CHOICES, CLASSIFICATION_METHOD_CHOICES
 
 
 class Dataset(models.Model):
@@ -37,3 +37,22 @@ class Tileset(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class TierList(models.Model):
+    dataset = models.ForeignKey(
+        Dataset, on_delete=models.CASCADE, related_name="tier_lists"
+    )
+    field = models.CharField(max_length=255)
+    method = models.CharField(
+        choices=CLASSIFICATION_METHOD_CHOICES,
+        max_length=50,
+        default=CLASSIFICATION_METHOD_CHOICES[0][0],
+    )
+    breaks = models.JSONField()
+
+    class Meta:
+        unique_together = ("dataset", "field", "method")
+
+    def __str__(self):
+        return f"TierList for {self.dataset.name} - {self.field} ({self.method})"

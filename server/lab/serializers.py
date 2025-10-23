@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Dataset, Tileset
+from .models import Dataset, Tileset, TierList
 
 
 class DatasetSerializer(serializers.ModelSerializer):
@@ -104,4 +104,23 @@ class TilesetSerializer(serializers.ModelSerializer):
             "metadata",
             "created_at",
             "updated_at",
+        ]
+
+
+class TierListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TierList
+        fields = [
+            "id",
+            "dataset",
+            "field",
+            "method",
+            "breaks",
+        ]
+        read_only_fields = [
+            "id",
+            "dataset",
+            "field",
+            "method",
+            "breaks",
         ]

@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Dataset, Tileset
-from .serializers import DatasetSerializer, TilesetSerializer
+from .models import Dataset, Tileset, TierList
+from .serializers import DatasetSerializer, TilesetSerializer, TierListSerializer
 from .filters import TilesetFilter
 from drf_spectacular.utils import extend_schema
 from .tasks import (
@@ -358,3 +358,41 @@ class TilesetViewSet(
                 {"error": f"Unexpected error: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class TierListViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = TierList.objects.all()
+    serializer_class = TierListSerializer
+
+    def get_queryset(self):
+        """Filter tier lists by dataset_id from URL parameters."""
+        dataset_id = self.kwargs.get("dataset_id")
+        if dataset_id:
+            return TierList.objects.filter(dataset_id=dataset_id)
+        return TierList.objects.all()
+
+    @extend_schema(
+        responses={
+            200: TierListSerializer(many=True),
+            404: {"type": "object", "properties": {"error": {"type": "string"}}},
+        },
+        summary="List tier lists for dataset",
+        description="Retrieve all tier lists associated with a specific dataset.",
+    )
+    def list(self, request, *args, **kwargs):
+        """List all tier lists for a specific dataset."""
+        # Verify that the dataset exists
+        dataset_id = self.kwargs.get("dataset_id")
+        try:
+            Dataset.objects.get(id=dataset_id)
+        except Dataset.DoesNotExist:
+            return Response(
+                {"error": "Dataset not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return super().list(request, *args, **kwargs)

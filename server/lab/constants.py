@@ -8,3 +8,13 @@ class TaskStatus(str, Enum):
 
 
 TASK_STATUS_CHOICES = [(status.value, status.name) for status in TaskStatus]
+
+
+class ClassificationMethod(str, Enum):
+    QUANTILE = "quantile"
+    NATURAL_BREAKS = "natural_breaks"
+
+
+CLASSIFICATION_METHOD_CHOICES = [
+    (method.value, method.name) for method in ClassificationMethod
+]

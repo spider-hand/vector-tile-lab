@@ -5,21 +5,40 @@
       <div v-if="!tileset" class="text-center py-4 text-sm text-muted-foreground">
         No tileset selected. Please select a tileset.
       </div>
-      <div v-else class="flex flex-col gap-3">
-        <h3 class="text-sm font-medium">Layer Visibility</h3>
-        <div v-if="tileset.metadata?.metadata?.vector_layers && tileset.metadata.metadata.vector_layers.length > 0">
-          <div v-for="layer in tileset.metadata.metadata.vector_layers" :key="layer.id"
-            class="flex flex-col gap-4 p-4 border rounded-lg">
-            <h4 class="text-sm font-medium">{{ layer.id }}</h4>
-            <div v-for="type in LAYER_TYPES" :key="type" class="flex items-center justify-between">
-              <label class="text-xs font-medium">{{ type.charAt(0).toUpperCase() + type.slice(1) }}</label>
-              <Switch :model-value="getLayerVisibility(layer.id, type)"
-                @update:model-value="toggleLayerType(layer.id, type, $event)" />
+      <div v-else class="flex flex-col gap-6">
+        <div class="flex flex-col gap-3">
+          <h3 class="text-sm font-medium">Style by Attribute</h3>
+          <div v-if="tierLists && tierLists.length > 0" class="flex flex-col gap-3">
+            <div class="flex flex-col gap-2">
+              <Select v-model="selectedAttributeField" @update:model-value="applySelectedAttribute">
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose an attribute..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="tierList in tierLists" :key="tierList.id" :value="tierList.field">
+                    {{ tierList.field }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
-        <div v-else class="text-center py-4 text-sm text-muted-foreground">
-          No vector layers found in this tileset.
+        <div class="flex flex-col gap-3">
+          <h3 class="text-sm font-medium">Layer Visibility</h3>
+          <div v-if="tileset.metadata?.metadata?.vector_layers && tileset.metadata.metadata.vector_layers.length > 0">
+            <div v-for="layer in tileset.metadata.metadata.vector_layers" :key="layer.id"
+              class="flex flex-col gap-4 p-4 border rounded-lg">
+              <h4 class="text-sm font-medium">{{ layer.id }}</h4>
+              <div v-for="type in LAYER_TYPES" :key="type" class="flex items-center justify-between">
+                <label class="text-xs font-medium">{{ type.charAt(0).toUpperCase() + type.slice(1) }}</label>
+                <Switch :model-value="getLayerVisibility(layer.id, type)"
+                  @update:model-value="toggleLayerType(layer.id, type, $event)" />
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center py-4 text-sm text-muted-foreground">
+            No vector layers found in this tileset.
+          </div>
         </div>
       </div>
     </div>
@@ -29,11 +48,20 @@
 <script setup lang="ts">
 import BaseSidebar from './BaseSidebar.vue'
 import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import { useSelectedData } from '@/composables/useSelectedData'
 import useTilesetQuery from '@/composables/useTilesetQuery'
+import { useTierListQuery } from '@/composables/useTierListQuery'
 import { useLayerStyles } from '@/composables/useLayerStyles'
-import { watch } from 'vue'
-import type { LayerType } from '@/types'
+import { watch, ref, computed } from 'vue'
+import type { TierList } from '@/services/models'
+import { LAYER_TYPES } from '@/consts'
 
 defineProps({
   open: {
@@ -46,11 +74,28 @@ defineEmits<{
   'update:open': [value: boolean]
 }>()
 
-const LAYER_TYPES: LayerType[] = ['fill', 'line', 'circle']
-
 const { selectedDatasetId, selectedTilesetId } = useSelectedData()
 const { tileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId)
-const { setLayersFromMetadata, toggleLayerType, getLayerVisibility, clearLayers } = useLayerStyles()
+const { tierLists } = useTierListQuery(selectedDatasetId, selectedTilesetId)
+const { setLayersFromMetadata, toggleLayerType, getLayerVisibility, clearLayers, applyTier, clearTier } = useLayerStyles()
+
+const selectedAttributeField = ref<string>('')
+
+const selectedTierList = computed((): TierList | undefined => {
+  if (selectedAttributeField.value === '' || !tierLists.value) return undefined
+  return tierLists.value.find(tl => tl.field === selectedAttributeField.value)
+})
+
+const applySelectedAttribute = () => {
+  if (selectedTierList.value) {
+    applyTier(
+      selectedTierList.value.field,
+      selectedTierList.value.breaks
+    )
+  } else {
+    clearTier()
+  }
+}
 
 // Initialize layer visibility when tileset changes
 watch(
@@ -63,5 +108,13 @@ watch(
     }
   },
   { immediate: true }
+)
+
+// Reset selected attribute when tileset changes
+watch(
+  () => selectedTilesetId.value,
+  () => {
+    selectedAttributeField.value = ''
+  }
 )
 </script>

@@ -13,6 +13,7 @@ import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
 import { useLayerStyles } from '@/composables/useLayerStyles';
 import type { LayerType, TileHeader, TileMetadataResponse, VectorLayer } from '@/types';
+import { COLOR_PALETTE } from '@/consts';
 
 const mapRef = ref<HTMLElement | null>(null);
 const map = ref<maplibregl.Map | null>(null);
@@ -22,7 +23,7 @@ maplibregl.addProtocol('pmtiles', protocol.tile);
 
 const { selectedDatasetId, selectedTilesetId } = useSelectedData();
 const { presignedUrl, isFetchingPresignedUrl, tileset, isFetchingTileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
-const { layersVisibility, getLayerVisibility } = useLayerStyles();
+const { layersVisibility, getLayerVisibility, tierStyleConfig } = useLayerStyles();
 
 const initializeMap = () => {
   if (!mapRef.value || map.value) return;
@@ -91,10 +92,57 @@ const addPmtilesLayer = (pmtilesUrl: string, tilesetMetadata: TileMetadataRespon
   flyToTilesetBounds(tilesetMetadata.header);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createTierColorExpression = (field: string, breaks: number[], colors: string[]): any => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const expression: any[] = ['case'];
+
+  for (let i = 0; i < breaks.length; i++) {
+    if (i === 0) {
+      // First class: value <= breaks[0]
+      expression.push(['<=', ['get', field], breaks[i]], colors[i]);
+    } else {
+      // Subsequent classes: breaks[i-1] < value <= breaks[i]
+      expression.push(
+        ['all', ['>', ['get', field], breaks[i - 1]], ['<=', ['get', field], breaks[i]]],
+        colors[i]
+      );
+    }
+  }
+
+  // Add fallback color for values that don't match any condition (required for 'case' expression)
+  expression.push(COLOR_PALETTE.BLUE);
+
+  return expression;
+};
+
 const addGenericLayer = (sourceLayer: string) => {
   if (!map.value) return;
 
-  const color = "#3b82f6"; // blue-500
+  const defaultColor = COLOR_PALETTE.BLUE;
+  const styleConfig = tierStyleConfig.value;
+
+  // Determine paint properties based on whether tier styling is active
+  const getFillColor = () => {
+    if (styleConfig) {
+      return createTierColorExpression(styleConfig.field, styleConfig.breaks, styleConfig.colors);
+    }
+    return defaultColor;
+  };
+
+  const getLineColor = () => {
+    if (styleConfig) {
+      return createTierColorExpression(styleConfig.field, styleConfig.breaks, styleConfig.colors);
+    }
+    return defaultColor;
+  };
+
+  const getCircleColor = () => {
+    if (styleConfig) {
+      return createTierColorExpression(styleConfig.field, styleConfig.breaks, styleConfig.colors);
+    }
+    return defaultColor;
+  };
 
   map.value.addLayer({
     id: `${sourceLayer}-fill`,
@@ -102,7 +150,7 @@ const addGenericLayer = (sourceLayer: string) => {
     source: 'pmtiles-source',
     'source-layer': sourceLayer,
     paint: {
-      'fill-color': color,
+      'fill-color': getFillColor(),
       'fill-opacity': 0.6
     },
     layout: {
@@ -116,7 +164,7 @@ const addGenericLayer = (sourceLayer: string) => {
     source: 'pmtiles-source',
     'source-layer': sourceLayer,
     paint: {
-      'line-color': color,
+      'line-color': getLineColor(),
       'line-width': 1,
       'line-opacity': 0.8
     },
@@ -131,7 +179,7 @@ const addGenericLayer = (sourceLayer: string) => {
     source: 'pmtiles-source',
     'source-layer': sourceLayer,
     paint: {
-      'circle-color': color,
+      'circle-color': getCircleColor(),
       'circle-radius': 4,
       'circle-opacity': 0.8,
       'circle-stroke-color': '#ffffff',
@@ -139,6 +187,40 @@ const addGenericLayer = (sourceLayer: string) => {
     },
     layout: {
       visibility: getLayerVisibility(sourceLayer, 'circle') ? 'visible' : 'none'
+    }
+  });
+};
+
+const updateLayerStyles = () => {
+  if (!map.value || !tileset.value?.metadata?.metadata?.vector_layers) return;
+
+  const mapInstance = map.value;
+  const styleConfig = tierStyleConfig.value;
+
+  tileset.value.metadata.metadata.vector_layers.forEach((layer: VectorLayer) => {
+    const sourceLayer = layer.id;
+
+    const fillLayerId = `${sourceLayer}-fill`;
+    const strokeLayerId = `${sourceLayer}-stroke`;
+    const pointLayerId = `${sourceLayer}-point`;
+
+    const colorExpression = styleConfig
+      ? createTierColorExpression(styleConfig.field, styleConfig.breaks, styleConfig.colors)
+      : COLOR_PALETTE.BLUE;
+
+    // Update fill layer
+    if (mapInstance.getLayer(fillLayerId)) {
+      mapInstance.setPaintProperty(fillLayerId, 'fill-color', colorExpression);
+    }
+
+    // Update stroke layer
+    if (mapInstance.getLayer(strokeLayerId)) {
+      mapInstance.setPaintProperty(strokeLayerId, 'line-color', colorExpression);
+    }
+
+    // Update point layer
+    if (mapInstance.getLayer(pointLayerId)) {
+      mapInstance.setPaintProperty(pointLayerId, 'circle-color', colorExpression);
     }
   });
 };
@@ -215,6 +297,15 @@ watch(
       updateLayerVisibility(sourceLayer, 'line', layerVisibility.line);
       updateLayerVisibility(sourceLayer, 'circle', layerVisibility.circle);
     });
+  },
+  { deep: true }
+);
+
+// Watch for tier style changes and update map layers accordingly
+watch(
+  () => tierStyleConfig.value,
+  () => {
+    updateLayerStyles();
   },
   { deep: true }
 );

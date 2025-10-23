@@ -65,6 +65,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/Dataset'
           description: ''
+  /api/v1/datasets/{datasetId}/tiers/:
+    get:
+      operationId: listDatasetsTiers
+      description: Retrieve all tier lists associated with a specific dataset.
+      summary: List tier lists for dataset
+      parameters:
+      - in: path
+        name: datasetId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - datasets
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TierList'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+          description: ''
   /api/v1/datasets/{datasetId}/tilesets/:
     get:
       operationId: listDatasetsTilesets
@@ -478,6 +513,14 @@ components:
       - id
       - name
       - updated_at
+    MethodEnum:
+      enum:
+      - quantile
+      - natural_breaks
+      type: string
+      description: |-
+        * `quantile` - QUANTILE
+        * `natural_breaks` - NATURAL_BREAKS
     StatusEnum:
       enum:
       - in_progress
@@ -488,6 +531,31 @@ components:
         * `in_progress` - IN_PROGRESS
         * `completed` - COMPLETED
         * `failed` - FAILED
+    TierList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        dataset:
+          type: integer
+          readOnly: true
+        field:
+          type: string
+          readOnly: true
+        method:
+          allOf:
+          - $ref: '#/components/schemas/MethodEnum'
+          readOnly: true
+          default: quantile
+        breaks:
+          readOnly: true
+      required:
+      - breaks
+      - dataset
+      - field
+      - id
+      - method
     Tileset:
       type: object
       properties:

@@ -5,8 +5,10 @@ from celery import shared_task
 import re
 import redis
 from pmtiles.reader import Reader, MmapSource
-from .constants import TaskStatus
-from .models import Dataset, Tileset
+import mapclassify
+import fiona
+from .constants import TaskStatus, ClassificationMethod
+from .models import Dataset, Tileset, TierList
 from .utils import s3_service
 
 
@@ -135,6 +137,106 @@ def upload_pmtiles_to_minio(local_path, object_name):
     except Exception as e:
         print(f"Failed to upload pmtiles to MinIO: {e}")
         return False
+
+
+def create_tier_lists_from_geojson(dataset):
+    print(f"Creating tier lists for dataset {dataset.id} ({dataset.name})")
+
+    # Download GeoJSON file from MinIO to temporary location
+    geojson_object_name = f"datasets/geojson/{dataset.name}.geojson"
+    local_geojson_path = f"/tmp/{dataset.name}_{dataset.id}_tierlist.geojson"
+
+    try:
+        # Download GeoJSON from MinIO
+        s3_service.internal_client.download_file(
+            s3_service.bucket_name, geojson_object_name, local_geojson_path
+        )
+
+        # Load GeoJSON with fiona and extract properties
+        print("Loading GeoJSON features and extracting properties...")
+        features_properties = []
+
+        with fiona.open(local_geojson_path) as src:
+            for feature in src:
+                if feature.get("properties"):
+                    features_properties.append(feature["properties"])
+
+        if not features_properties:
+            print("No features with properties found in GeoJSON")
+            return
+
+        print(f"Loaded {len(features_properties)} features")
+
+        # Identify numeric fields and collect their values
+        numeric_fields = {}
+
+        # Get all field names from the first feature
+        if features_properties:
+            field_names = features_properties[0].keys()
+
+            for field_name in field_names:
+                numeric_values = []
+
+                # Collect all numeric values for this field
+                for properties in features_properties:
+                    value = properties.get(field_name)
+                    if (
+                        value is not None
+                        and isinstance(value, (int, float))
+                        and not isinstance(value, bool)
+                    ):
+                        numeric_values.append(float(value))
+
+                # Only keep fields with at least 2 numeric values
+                if len(numeric_values) >= 2:
+                    numeric_fields[field_name] = numeric_values
+
+        print(f"Found numeric fields: {list(numeric_fields.keys())}")
+
+        # Create tier lists for each numeric field
+        for field_name, values in numeric_fields.items():
+            try:
+                print(f"Processing field {field_name}...")
+
+                # Skip if all values are the same
+                unique_values = set(values)
+                if len(unique_values) == 1:
+                    print("All values are the same. Skipping...")
+                    continue
+
+                # Create breaks with quantile classification
+                num_classes = min(5, len(unique_values))
+                classifier = mapclassify.Quantiles(values, k=num_classes)
+                breaks = classifier.bins.tolist()
+
+                # Save TierList
+                TierList.objects.create(
+                    dataset=dataset,
+                    field=field_name,
+                    method=ClassificationMethod.QUANTILE,
+                    breaks=breaks,
+                )
+
+                print(f"Created tier list for field {field_name} successfully.")
+
+            except Exception as e:
+                print(f"Error creating tier list for field {field_name}: {e}")
+                continue
+
+        # Clean up temporary file
+        try:
+            os.remove(local_geojson_path)
+        except Exception as e:
+            print(f"Warning: Could not remove temporary file {local_geojson_path}: {e}")
+
+    except Exception as e:
+        print(f"Error downloading or processing GeoJSON for tier lists: {e}")
+        # Try to clean up on error
+        try:
+            if os.path.exists(local_geojson_path):
+                os.remove(local_geojson_path)
+        except Exception:
+            pass
 
 
 @shared_task
@@ -364,6 +466,9 @@ def process_uploaded_geojson(dataset_id, dataset_name):
     except Dataset.DoesNotExist:
         print(f"Dataset with id {dataset_id} does not exist")
         return
+
+    # Create tier lists for numeric attributes from the dataset
+    create_tier_lists_from_geojson(dataset)
 
     tileset = Tileset.objects.create(
         dataset=dataset, name="default", status=TaskStatus.IN_PROGRESS, metadata={}

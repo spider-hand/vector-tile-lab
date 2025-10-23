@@ -15,27 +15,30 @@
 
 import * as runtime from '../runtime';
 import type {
-  CreateDatasetsTilesets400Response,
   CreateDatasetsTilesetsRequest,
   Dataset,
+  ListDatasetsTiers404Response,
   RetrieveDatasetsProgress200Response,
   RetrieveDatasetsTilesetsPresignedUrl200Response,
   RetrieveDatasetsTilesetsProgress200Response,
+  TierList,
   Tileset,
 } from '../models/index';
 import {
-    CreateDatasetsTilesets400ResponseFromJSON,
-    CreateDatasetsTilesets400ResponseToJSON,
     CreateDatasetsTilesetsRequestFromJSON,
     CreateDatasetsTilesetsRequestToJSON,
     DatasetFromJSON,
     DatasetToJSON,
+    ListDatasetsTiers404ResponseFromJSON,
+    ListDatasetsTiers404ResponseToJSON,
     RetrieveDatasetsProgress200ResponseFromJSON,
     RetrieveDatasetsProgress200ResponseToJSON,
     RetrieveDatasetsTilesetsPresignedUrl200ResponseFromJSON,
     RetrieveDatasetsTilesetsPresignedUrl200ResponseToJSON,
     RetrieveDatasetsTilesetsProgress200ResponseFromJSON,
     RetrieveDatasetsTilesetsProgress200ResponseToJSON,
+    TierListFromJSON,
+    TierListToJSON,
     TilesetFromJSON,
     TilesetToJSON,
 } from '../models/index';
@@ -62,6 +65,10 @@ export interface DestroyDatasetsRequest {
 export interface DestroyDatasetsTilesetsRequest {
     datasetId: number;
     id: number;
+}
+
+export interface ListDatasetsTiersRequest {
+    datasetId: number;
 }
 
 export interface ListDatasetsTilesetsRequest {
@@ -341,6 +348,48 @@ export class DatasetsApi extends runtime.BaseAPI {
      */
     async listDatasets(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Dataset>> {
         const response = await this.listDatasetsRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Retrieve all tier lists associated with a specific dataset.
+     * List tier lists for dataset
+     */
+    async listDatasetsTiersRaw(requestParameters: ListDatasetsTiersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<TierList>>> {
+        if (requestParameters['datasetId'] == null) {
+            throw new runtime.RequiredError(
+                'datasetId',
+                'Required parameter "datasetId" was null or undefined when calling listDatasetsTiers().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+
+        let urlPath = `/api/v1/datasets/{datasetId}/tiers/`;
+        urlPath = urlPath.replace(`{${"datasetId"}}`, encodeURIComponent(String(requestParameters['datasetId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(TierListFromJSON));
+    }
+
+    /**
+     * Retrieve all tier lists associated with a specific dataset.
+     * List tier lists for dataset
+     */
+    async listDatasetsTiers(requestParameters: ListDatasetsTiersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<TierList>> {
+        const response = await this.listDatasetsTiersRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

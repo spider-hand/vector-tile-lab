@@ -1,7 +1,15 @@
 import { ref } from 'vue'
 import type { LayerType, LayerVisibilityState, VectorLayer } from '@/types'
+import { TIER_COLORS } from '@/consts'
+
+export interface TierStyleConfig {
+  field: string
+  breaks: number[]
+  colors: string[]
+}
 
 const layersVisibility = ref<LayerVisibilityState>({})
+const tierStyleConfig = ref<TierStyleConfig | null>(null)
 
 export const useLayerStyles = () => {
   const setLayersFromMetadata = (layers: VectorLayer[]) => {
@@ -32,11 +40,26 @@ export const useLayerStyles = () => {
     layersVisibility.value = {}
   }
 
+  const applyTier = (field: string, breaks: number[]) => {
+    tierStyleConfig.value = {
+      field,
+      breaks,
+      colors: TIER_COLORS.slice(0, breaks.length + 1),
+    }
+  }
+
+  const clearTier = () => {
+    tierStyleConfig.value = null
+  }
+
   return {
     layersVisibility,
+    tierStyleConfig,
     setLayersFromMetadata,
     toggleLayerType,
     getLayerVisibility,
     clearLayers,
+    applyTier,
+    clearTier,
   }
 }
