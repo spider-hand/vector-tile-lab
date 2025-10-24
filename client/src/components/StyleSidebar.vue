@@ -34,6 +34,21 @@
                 </SelectContent>
               </Select>
             </div>
+            <div v-if="selectedTierList" class="flex flex-col gap-2">
+              <label class="text-xs font-medium text-muted-foreground">Legend</label>
+              <div class="grid grid-cols-1 gap-2">
+                <div v-for="(breakValue, index) in selectedTierList.breaks" :key="index"
+                  class="flex items-center justify-between px-3 py-2 border rounded text-xs">
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded" :style="{ backgroundColor: getTierColor(index) }"></div>
+                    <span class="font-medium">Tier {{ index + 1 }}</span>
+                  </div>
+                  <span class="text-muted-foreground">
+                    {{ getTierRange(index) }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="flex flex-col gap-3">
@@ -74,7 +89,7 @@ import { useTierListQuery } from '@/composables/useTierListQuery'
 import { useLayerStyles } from '@/composables/useLayerStyles'
 import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
-import { LAYER_TYPES, COLOR_THEME_LIST } from '@/consts'
+import { LAYER_TYPES, COLOR_THEME_LIST, TIER_COLORS } from '@/consts'
 
 defineProps({
   open: {
@@ -107,6 +122,26 @@ const applySelectedAttribute = () => {
     )
   } else {
     clearTier()
+  }
+}
+
+const getTierColor = (index: number): string => {
+  if (!selectedTierList.value) return '#cccccc'
+  // Get colors from the current color theme
+  const themeColors = TIER_COLORS[selectedColorTheme.value]
+  return themeColors[index]
+}
+
+const getTierRange = (index: number): string => {
+  if (!selectedTierList.value) return ''
+  const breaks = selectedTierList.value.breaks
+
+  if (index === 0) {
+    // First tier: ≤ breaks[0]
+    return `≤ ${breaks[0]}`
+  } else {
+    // Subsequent tiers: breaks[i-1] < value ≤ breaks[i]
+    return `${breaks[index - 1]} - ${breaks[index]}`
   }
 }
 
