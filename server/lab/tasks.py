@@ -17,7 +17,14 @@ def get_redis_client():
 
 
 def run_tippecanoe_with_progress(
-    geojson_path, output_path, redis_key, additional_options=None
+    geojson_path,
+    output_path,
+    redis_key,
+    additional_options=[
+        "--maximum-zoom",
+        "g",
+        "--drop-densest-as-needed",
+    ],  # Recommended options by the official
 ):
     redis_client = get_redis_client()
 
@@ -505,7 +512,7 @@ def process_uploaded_geojson(dataset_id, dataset_name):
     print(f"Running tippecanoe for {dataset_name} ...")
 
     success = run_tippecanoe_with_progress(
-        local_geojson_path, local_pmtiles_path, redis_key, additional_options=None
+        local_geojson_path, local_pmtiles_path, redis_key
     )
 
     if not success:
