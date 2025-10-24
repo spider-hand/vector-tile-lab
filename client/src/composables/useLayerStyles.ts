@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import type { LayerType, LayerVisibilityState, VectorLayer } from '@/types'
-import { TIER_COLORS } from '@/consts'
+import { TIER_COLORS, type ColorPaletteType } from '@/consts'
 
 export interface TierStyleConfig {
   field: string
@@ -9,6 +9,7 @@ export interface TierStyleConfig {
 }
 
 const layersVisibility = ref<LayerVisibilityState>({})
+const selectedColorTheme = ref<ColorPaletteType>('chartjs')
 const tierStyleConfig = ref<TierStyleConfig | null>(null)
 
 export const useLayerStyles = () => {
@@ -44,7 +45,7 @@ export const useLayerStyles = () => {
     tierStyleConfig.value = {
       field,
       breaks,
-      colors: TIER_COLORS.slice(0, breaks.length + 1),
+      colors: TIER_COLORS[selectedColorTheme.value].slice(0, breaks.length + 1),
     }
   }
 
@@ -55,6 +56,7 @@ export const useLayerStyles = () => {
   return {
     layersVisibility,
     tierStyleConfig,
+    selectedColorTheme,
     setLayersFromMetadata,
     toggleLayerType,
     getLayerVisibility,

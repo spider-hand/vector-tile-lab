@@ -36,7 +36,8 @@
           <div v-for="(tileset, index) in comparisonData" :key="tileset.id"
             class="flex items-center justify-between px-4 py-2 border rounded text-xs">
             <div class="flex items-center gap-2">
-              <div class="w-3 h-3 rounded" :style="{ backgroundColor: chartColors[index % chartColors.length] }"></div>
+              <div class="w-3 h-3 rounded"
+                :style="{ backgroundColor: COLOR_PALETTE_CHARTJS[index % COLOR_PALETTE_CHARTJS.length] }"></div>
               <span class="font-medium">{{ tileset.name }}</span>
             </div>
             <span class="text-muted-foreground">
@@ -94,6 +95,7 @@ import {
 } from 'chart.js'
 import { calculateTilesAtZoom } from '@/utils'
 import type { Tileset } from '@/services'
+import { COLOR_PALETTE_CHARTJS } from '@/consts'
 
 Chart.register(CategoryScale, LinearScale, LineElement, PointElement, LineController, Title, Tooltip, Legend)
 
@@ -125,17 +127,6 @@ const toggleTilesetSelection = (tilesetId: number) => {
     selectedTilesetIds.value.push(tilesetId)
   }
 }
-
-const chartColors = [
-  '#3b82f6',
-  '#ef4444',
-  '#10b981',
-  '#f59e0b',
-  '#8b5cf6',
-  '#06b6d4',
-  '#f97316',
-  '#84cc16',
-]
 
 const availableTilesets = computed(() => {
   if (!datasets.value) return []
@@ -195,7 +186,7 @@ const chartData = computed(() => {
         return found ? found.tiles : 0
       })
 
-      const currentColor = chartColors[index % chartColors.length]
+      const currentColor = COLOR_PALETTE_CHARTJS[index % COLOR_PALETTE_CHARTJS.length]
 
       return {
         label: data.name,

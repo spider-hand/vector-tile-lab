@@ -21,6 +21,19 @@
                 </SelectContent>
               </Select>
             </div>
+            <div v-if="selectedAttributeField" class="flex flex-col gap-2">
+              <label class="text-xs font-medium text-muted-foreground">Color Theme</label>
+              <Select v-model="selectedColorTheme">
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a color theme..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="theme in COLOR_THEME_LIST" :key="theme.value" :value="theme.value">
+                    {{ theme.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
         <div class="flex flex-col gap-3">
@@ -61,7 +74,7 @@ import { useTierListQuery } from '@/composables/useTierListQuery'
 import { useLayerStyles } from '@/composables/useLayerStyles'
 import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
-import { LAYER_TYPES } from '@/consts'
+import { LAYER_TYPES, COLOR_THEME_LIST } from '@/consts'
 
 defineProps({
   open: {
@@ -77,7 +90,7 @@ defineEmits<{
 const { selectedDatasetId, selectedTilesetId } = useSelectedData()
 const { tileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId)
 const { tierLists } = useTierListQuery(selectedDatasetId, selectedTilesetId)
-const { setLayersFromMetadata, toggleLayerType, getLayerVisibility, clearLayers, applyTier, clearTier } = useLayerStyles()
+const { selectedColorTheme, setLayersFromMetadata, toggleLayerType, getLayerVisibility, clearLayers, applyTier, clearTier } = useLayerStyles()
 
 const selectedAttributeField = ref<string>('')
 
@@ -110,11 +123,20 @@ watch(
   { immediate: true }
 )
 
-// Reset selected attribute when tileset changes
+// Apply the new color theme
 watch(
-  () => selectedTilesetId.value,
+  () => selectedColorTheme.value,
+  () => {
+    applySelectedAttribute()
+  }
+)
+
+// Reset selected attribute and tier when dataset changes
+watch(
+  () => selectedDatasetId.value,
   () => {
     selectedAttributeField.value = ''
+    clearTier()
   }
 )
 </script>

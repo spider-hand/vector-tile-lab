@@ -13,7 +13,7 @@ import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
 import { useLayerStyles } from '@/composables/useLayerStyles';
 import type { LayerType, TileHeader, TileMetadataResponse, VectorLayer } from '@/types';
-import { COLOR_PALETTE } from '@/consts';
+import { DEFFAULT_COLOR } from '@/consts';
 
 const mapRef = ref<HTMLElement | null>(null);
 const map = ref<maplibregl.Map | null>(null);
@@ -111,7 +111,7 @@ const createTierColorExpression = (field: string, breaks: number[], colors: stri
   }
 
   // Add fallback color for values that don't match any condition (required for 'case' expression)
-  expression.push(COLOR_PALETTE.BLUE);
+  expression.push(DEFFAULT_COLOR);
 
   return expression;
 };
@@ -119,7 +119,6 @@ const createTierColorExpression = (field: string, breaks: number[], colors: stri
 const addGenericLayer = (sourceLayer: string) => {
   if (!map.value) return;
 
-  const defaultColor = COLOR_PALETTE.BLUE;
   const styleConfig = tierStyleConfig.value;
 
   // Determine paint properties based on whether tier styling is active
@@ -127,21 +126,21 @@ const addGenericLayer = (sourceLayer: string) => {
     if (styleConfig) {
       return createTierColorExpression(styleConfig.field, styleConfig.breaks, styleConfig.colors);
     }
-    return defaultColor;
+    return DEFFAULT_COLOR;
   };
 
   const getLineColor = () => {
     if (styleConfig) {
       return createTierColorExpression(styleConfig.field, styleConfig.breaks, styleConfig.colors);
     }
-    return defaultColor;
+    return DEFFAULT_COLOR;
   };
 
   const getCircleColor = () => {
     if (styleConfig) {
       return createTierColorExpression(styleConfig.field, styleConfig.breaks, styleConfig.colors);
     }
-    return defaultColor;
+    return DEFFAULT_COLOR;
   };
 
   map.value.addLayer({
@@ -182,8 +181,6 @@ const addGenericLayer = (sourceLayer: string) => {
       'circle-color': getCircleColor(),
       'circle-radius': 4,
       'circle-opacity': 0.8,
-      'circle-stroke-color': '#ffffff',
-      'circle-stroke-width': 1
     },
     layout: {
       visibility: getLayerVisibility(sourceLayer, 'circle') ? 'visible' : 'none'
@@ -206,7 +203,7 @@ const updateLayerStyles = () => {
 
     const colorExpression = styleConfig
       ? createTierColorExpression(styleConfig.field, styleConfig.breaks, styleConfig.colors)
-      : COLOR_PALETTE.BLUE;
+      : DEFFAULT_COLOR;
 
     // Update fill layer
     if (mapInstance.getLayer(fillLayerId)) {
