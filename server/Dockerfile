@@ -8,6 +8,11 @@ ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     UV_PYTHON_DOWNLOADS=0
 
+# Install GDAL development libraries required to build fiona
+RUN apt-get update && \
+    apt-get -y install --no-install-recommends libgdal-dev gcc g++ && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 RUN --mount=type=cache,target=/root/.cache/uv \
