@@ -13,6 +13,7 @@ TASK_STATUS_CHOICES = [(status.value, status.name) for status in TaskStatus]
 class ClassificationMethod(str, Enum):
     QUANTILE = "quantile"
     NATURAL_BREAKS = "natural_breaks"
+    PERCENTILE = "percentile"
 
 
 CLASSIFICATION_METHOD_CHOICES = [

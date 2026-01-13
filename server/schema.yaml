@@ -517,10 +517,12 @@ components:
       enum:
       - quantile
       - natural_breaks
+      - percentile
       type: string
       description: |-
         * `quantile` - QUANTILE
         * `natural_breaks` - NATURAL_BREAKS
+        * `percentile` - PERCENTILE
     StatusEnum:
       enum:
       - in_progress

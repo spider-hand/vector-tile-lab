@@ -205,29 +205,54 @@ def create_tier_lists_from_geojson(dataset):
             try:
                 print(f"Processing field {field_name}...")
 
-                # Skip if all values are the same
                 unique_values = set(values)
                 if len(unique_values) == 1:
                     print("All values are the same. Skipping...")
                     continue
 
-                # Create breaks with quantile classification
-                num_classes = min(5, len(unique_values))
-                classifier = mapclassify.Quantiles(values, k=num_classes)
-                breaks = classifier.bins.tolist()
+                num_classes_standard = min(5, len(unique_values))
 
-                # Save TierList
-                TierList.objects.create(
-                    dataset=dataset,
-                    field=field_name,
-                    method=ClassificationMethod.QUANTILE,
-                    breaks=breaks,
-                )
+                try:
+                    classifier = mapclassify.Quantiles(values, k=num_classes_standard)
+                    breaks = classifier.bins.tolist()
+                    TierList.objects.create(
+                        dataset=dataset,
+                        field=field_name,
+                        method=ClassificationMethod.QUANTILE,
+                        breaks=breaks,
+                    )
+                    print(f"Created quantile tier list for field {field_name}")
+                except Exception as e:
+                    print(f"Error creating quantile tier list for field {field_name}: {e}")
 
-                print(f"Created tier list for field {field_name} successfully.")
+                try:
+                    classifier = mapclassify.NaturalBreaks(values, k=num_classes_standard)
+                    breaks = classifier.bins.tolist()
+                    TierList.objects.create(
+                        dataset=dataset,
+                        field=field_name,
+                        method=ClassificationMethod.NATURAL_BREAKS,
+                        breaks=breaks,
+                    )
+                    print(f"Created natural breaks tier list for field {field_name}")
+                except Exception as e:
+                    print(f"Error creating natural breaks tier list for field {field_name}: {e}")
+
+                try:
+                    classifier = mapclassify.Percentiles(values, pct=[1, 10, 50, 90, 99, 100])
+                    breaks = classifier.bins.tolist()
+                    TierList.objects.create(
+                        dataset=dataset,
+                        field=field_name,
+                        method=ClassificationMethod.PERCENTILE,
+                        breaks=breaks,
+                    )
+                    print(f"Created percentile tier list for field {field_name}")
+                except Exception as e:
+                    print(f"Error creating percentile tier list for field {field_name}: {e}")
 
             except Exception as e:
-                print(f"Error creating tier list for field {field_name}: {e}")
+                print(f"Error processing field {field_name}: {e}")
                 continue
 
         # Clean up temporary file

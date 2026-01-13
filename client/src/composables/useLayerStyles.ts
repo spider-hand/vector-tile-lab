@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import type { LayerType, LayerVisibilityState, VectorLayer } from '@/types'
-import { TIER_COLORS, type ColorPaletteType } from '@/consts'
+import { type ColorPaletteType } from '@/consts'
 
 export interface TierStyleConfig {
   field: string
@@ -41,11 +41,11 @@ export const useLayerStyles = () => {
     layersVisibility.value = {}
   }
 
-  const applyTier = (field: string, breaks: number[]) => {
+  const applyTier = (field: string, breaks: number[], colors: string[]) => {
     tierStyleConfig.value = {
       field,
       breaks,
-      colors: TIER_COLORS[selectedColorTheme.value].slice(0, breaks.length + 1),
+      colors: colors.slice(0, breaks.length),
     }
   }
 

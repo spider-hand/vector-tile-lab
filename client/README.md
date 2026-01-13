@@ -43,3 +43,11 @@ npm run test:unit
 ```sh
 npm run lint
 ```
+
+## Generate API client with [OpenAPI generator](https://openapi-generator.tech)
+
+Run
+
+```sh
+openapi-generator generate -i ../server/schema.yaml -g typescript-fetch -o ./src/services/
+```

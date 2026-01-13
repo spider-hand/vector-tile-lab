@@ -10,18 +10,31 @@
           <h3 class="text-sm font-medium">Style by Attribute</h3>
           <div v-if="tierLists && tierLists.length > 0" class="flex flex-col gap-3">
             <div class="flex flex-col gap-2">
-              <Select v-model="selectedAttributeField" @update:model-value="applySelectedAttribute">
+              <Select v-model="selectedAttributeField" @update:model-value="onAttributeFieldChange">
                 <SelectTrigger>
                   <SelectValue placeholder="Choose an attribute..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="tierList in tierLists" :key="tierList.id" :value="tierList.field">
-                    {{ tierList.field }}
+                  <SelectItem v-for="field in uniqueFields" :key="field" :value="field">
+                    {{ field }}
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div v-if="selectedAttributeField" class="flex flex-col gap-2">
+              <label class="text-xs font-medium text-muted-foreground">Classification Method</label>
+              <Select v-model="selectedMethod" @update:model-value="applySelectedAttribute">
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a method..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="method in availableMethods" :key="method.value" :value="method.value">
+                    {{ method.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div v-if="selectedAttributeField && selectedMethod" class="flex flex-col gap-2">
               <label class="text-xs font-medium text-muted-foreground">Color Theme</label>
               <Select v-model="selectedColorTheme">
                 <SelectTrigger>
@@ -40,11 +53,11 @@
                 <div v-for="(breakValue, index) in selectedTierList.breaks" :key="index"
                   class="flex items-center justify-between px-3 py-2 border rounded text-xs">
                   <div class="flex items-center gap-2">
-                    <div class="w-3 h-3 rounded" :style="{ backgroundColor: getTierColor(index) }"></div>
-                    <span class="font-medium">Tier {{ index + 1 }}</span>
+                    <div class="w-3 h-3 rounded" :style="{ backgroundColor: getTierColor(Number(index)) }"></div>
+                    <span class="font-medium">Tier {{ Number(index) + 1 }}</span>
                   </div>
                   <span class="text-muted-foreground">
-                    {{ getTierRange(index) }}
+                    {{ getTierRange(Number(index)) }}
                   </span>
                 </div>
               </div>
@@ -89,7 +102,7 @@ import { useTierListQuery } from '@/composables/useTierListQuery'
 import { useLayerStyles } from '@/composables/useLayerStyles'
 import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
-import { LAYER_TYPES, COLOR_THEME_LIST, TIER_COLORS } from '@/consts'
+import { LAYER_TYPES, COLOR_THEME_LIST, CLASSIFICATION_METHOD_LIST, getTierColors } from '@/consts'
 
 defineProps({
   open: {
@@ -108,17 +121,45 @@ const { tierLists } = useTierListQuery(selectedDatasetId, selectedTilesetId)
 const { selectedColorTheme, setLayersFromMetadata, toggleLayerType, getLayerVisibility, clearLayers, applyTier, clearTier } = useLayerStyles()
 
 const selectedAttributeField = ref<string>('')
+const selectedMethod = ref<string>('')
+
+const uniqueFields = computed(() => {
+  if (!tierLists.value) return []
+  return Array.from(new Set(tierLists.value.map(tl => tl.field)))
+})
+
+const availableMethods = computed(() => {
+  if (!selectedAttributeField.value || !tierLists.value) return []
+  const methods = tierLists.value
+    .filter(tl => tl.field === selectedAttributeField.value)
+    .map(tl => tl.method)
+  return CLASSIFICATION_METHOD_LIST.filter(m => methods.includes(m.value))
+})
 
 const selectedTierList = computed((): TierList | undefined => {
-  if (selectedAttributeField.value === '' || !tierLists.value) return undefined
-  return tierLists.value.find(tl => tl.field === selectedAttributeField.value)
+  if (selectedAttributeField.value === '' || selectedMethod.value === '' || !tierLists.value) return undefined
+  return tierLists.value.find(tl => tl.field === selectedAttributeField.value && tl.method === selectedMethod.value)
 })
+
+const onAttributeFieldChange = () => {
+  if (availableMethods.value.length > 0) {
+    const defaultMethod = availableMethods.value.find(m => m.value === 'quantile')
+    selectedMethod.value = defaultMethod ? defaultMethod.value : availableMethods.value[0].value
+    applySelectedAttribute()
+  } else {
+    selectedMethod.value = ''
+    clearTier()
+  }
+}
 
 const applySelectedAttribute = () => {
   if (selectedTierList.value) {
+    const classCount = selectedTierList.value.breaks.length
+    const colors = getTierColors(selectedColorTheme.value, classCount)
     applyTier(
       selectedTierList.value.field,
-      selectedTierList.value.breaks
+      selectedTierList.value.breaks,
+      colors
     )
   } else {
     clearTier()
@@ -127,8 +168,8 @@ const applySelectedAttribute = () => {
 
 const getTierColor = (index: number): string => {
   if (!selectedTierList.value) return '#cccccc'
-  // Get colors from the current color theme
-  const themeColors = TIER_COLORS[selectedColorTheme.value]
+  const classCount = selectedTierList.value.breaks.length
+  const themeColors = getTierColors(selectedColorTheme.value, classCount)
   return themeColors[index]
 }
 
@@ -171,6 +212,7 @@ watch(
   () => selectedDatasetId.value,
   () => {
     selectedAttributeField.value = ''
+    selectedMethod.value = ''
     clearTier()
   }
 )

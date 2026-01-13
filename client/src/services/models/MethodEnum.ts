@@ -16,11 +16,13 @@
 /**
  * * `quantile` - QUANTILE
  * * `natural_breaks` - NATURAL_BREAKS
+ * * `percentile` - PERCENTILE
  * @export
  */
 export const MethodEnum = {
     Quantile: 'quantile',
-    NaturalBreaks: 'natural_breaks'
+    NaturalBreaks: 'natural_breaks',
+    Percentile: 'percentile'
 } as const;
 export type MethodEnum = typeof MethodEnum[keyof typeof MethodEnum];
 
