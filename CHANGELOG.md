@@ -1,3 +1,10 @@
+### [1.4.0](https://github.com/spider-hand/vector-tile-lab/compare/v1.3.0...v1.4.0) (2026-01-20)
+
+### Changes
+
+- Generate tiles with recommended options as default
+- Support classification methods (Quantile, Natural Breaks and Percentile)
+
 ### [1.3.0](https://github.com/spider-hand/vector-tile-lab/compare/v1.2.0...v1.3.0) (2025-10-24)
 
 #### Changes
