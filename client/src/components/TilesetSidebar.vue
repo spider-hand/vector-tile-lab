@@ -106,8 +106,13 @@
             </TableBody>
           </Table>
         </div>
-        <div v-else class="text-center py-4 text-sm text-muted-foreground">
-          No tilesets available
+        <div v-else class="text-center py-8 text-sm text-muted-foreground">
+          <div class="flex flex-col items-center gap-2">
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+              <PackageSearch />
+            </div>
+            <p>No tileset available</p>
+          </div>
         </div>
       </div>
     </div>
@@ -123,7 +128,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { LoaderCircle, CheckCircle, AlertCircle } from 'lucide-vue-next'
+import { LoaderCircle, CheckCircle, AlertCircle, PackageSearch } from 'lucide-vue-next'
 import { useSelectedData } from '@/composables/useSelectedData'
 import { useDatasetQuery } from '@/composables/useDatasetQuery'
 import useTilesetQuery from '@/composables/useTilesetQuery'

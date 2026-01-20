@@ -2,30 +2,24 @@
   <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Comparison"
     description="Compare tile distribution across tilesets" :width="'w-160'">
     <div class="flex flex-col gap-4">
-      <div class="flex flex-col gap-3">
-        <h3 class="text-sm font-medium">Select Tilesets for Comparison</h3>
-        <div v-if="availableTilesets.length === 0" class="text-sm text-muted-foreground text-center py-4">
-          No tilesets available for comparison
-        </div>
-        <div v-else>
-          <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-              <Button variant="outline" class="w-full justify-between">
-                <span class="text-muted-foreground">
-                  Select tilesets...
-                </span>
-                <ChevronDown class="h-4 w-4 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent class="w-full">
-              <DropdownMenuCheckboxItem v-for="tileset in availableTilesets" :key="tileset.id"
-                :model-value="selectedTilesetIds.includes(tileset.id)"
-                @update:model-value="toggleTilesetSelection(tileset.id)">
-                {{ tileset.name }}
-              </DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      <div v-if="availableTilesets.length > 0" class="flex flex-col gap-3">
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button variant="outline" class="w-full justify-between">
+              <span class="text-muted-foreground">
+                Select tilesets...
+              </span>
+              <ChevronDown class="h-4 w-4 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent class="w-full">
+            <DropdownMenuCheckboxItem v-for="tileset in availableTilesets" :key="tileset.id"
+              :model-value="selectedTilesetIds.includes(tileset.id)"
+              @update:model-value="toggleTilesetSelection(tileset.id)">
+              {{ tileset.name }}
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div v-if="chartData && selectedTilesetIds.length > 0" class="flex flex-col gap-3">
         <h3 class="text-sm font-medium">Tiles by Zoom Level</h3>
@@ -46,20 +40,12 @@
           </div>
         </div>
       </div>
-      <div v-else-if="selectedTilesetIds.length === 0" class="text-center py-8 text-sm text-muted-foreground">
-        <div class="flex flex-col items-center gap-2">
-          <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-            📊
-          </div>
-          <p>Select tilesets to compare their tile distribution</p>
-        </div>
-      </div>
       <div v-else class="text-center py-8 text-sm text-muted-foreground">
         <div class="flex flex-col items-center gap-2">
           <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-            📊
+            <PackageSearch />
           </div>
-          <p>No data available</p>
+          <p>No tileset available</p>
         </div>
       </div>
     </div>
@@ -76,7 +62,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown } from 'lucide-vue-next'
+import { ChevronDown, PackageSearch } from 'lucide-vue-next'
 import { useSelectedData } from '@/composables/useSelectedData'
 import { useDatasetQuery } from '@/composables/useDatasetQuery'
 import useTilesetQuery from '@/composables/useTilesetQuery'

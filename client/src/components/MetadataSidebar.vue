@@ -2,7 +2,15 @@
   <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Metadata"
     description="Analysis of PMTiles">
     <div class="flex-1">
-      <div v-if="data" class="flex flex-col gap-4">
+      <div v-if="!data" class="text-center py-8 text-sm text-muted-foreground">
+        <div class="flex flex-col items-center gap-2">
+          <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+            <PackageSearch />
+          </div>
+          <p>No tileset available</p>
+        </div>
+      </div>
+      <div v-else class="flex flex-col gap-4">
         <div class="bg-gray-50 rounded-lg p-4">
           <h3 class="font-medium mb-3">Basic Information</h3>
           <div class="flex flex-col gap-2 text-xs">
@@ -144,6 +152,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import BaseSidebar from './BaseSidebar.vue';
+import { PackageSearch } from 'lucide-vue-next';
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
 import type { DataStat, TileMetadataResponse } from '@/types';

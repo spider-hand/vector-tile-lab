@@ -123,8 +123,13 @@
             </TableBody>
           </Table>
         </div>
-        <div v-else class="text-center py-4 text-sm text-muted-foreground">
-          No datasets available
+        <div v-else class="text-center py-8 text-sm text-muted-foreground">
+          <div class="flex flex-col items-center gap-2">
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+              <PackageSearch />
+            </div>
+            <p>No dataset available</p>
+          </div>
         </div>
       </div>
     </div>
@@ -138,7 +143,7 @@ import FileUploadItem from './FileUploadItem.vue'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CloudUpload, LoaderCircle, X, CheckCircle, AlertCircle, File, Files } from 'lucide-vue-next'
+import { CloudUpload, LoaderCircle, X, CheckCircle, AlertCircle, File, Files, PackageSearch } from 'lucide-vue-next'
 import { useDatasetQuery } from '@/composables/useDatasetQuery'
 import { useSelectedData } from '@/composables/useSelectedData'
 import useTilesetQuery from '@/composables/useTilesetQuery'
