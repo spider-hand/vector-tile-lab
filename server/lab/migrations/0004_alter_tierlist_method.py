@@ -4,15 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('lab', '0003_tierlist'),
+        ("lab", "0003_tierlist"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tierlist',
-            name='method',
-            field=models.CharField(choices=[('quantile', 'QUANTILE'), ('natural_breaks', 'NATURAL_BREAKS'), ('percentile', 'PERCENTILE')], default='quantile', max_length=50),
+            model_name="tierlist",
+            name="method",
+            field=models.CharField(
+                choices=[
+                    ("quantile", "QUANTILE"),
+                    ("natural_breaks", "NATURAL_BREAKS"),
+                    ("percentile", "PERCENTILE"),
+                ],
+                default="quantile",
+                max_length=50,
+            ),
         ),
     ]

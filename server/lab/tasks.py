@@ -223,10 +223,14 @@ def create_tier_lists_from_geojson(dataset):
                     )
                     print(f"Created quantile tier list for field {field_name}")
                 except Exception as e:
-                    print(f"Error creating quantile tier list for field {field_name}: {e}")
+                    print(
+                        f"Error creating quantile tier list for field {field_name}: {e}"
+                    )
 
                 try:
-                    classifier = mapclassify.NaturalBreaks(values, k=num_classes_standard)
+                    classifier = mapclassify.NaturalBreaks(
+                        values, k=num_classes_standard
+                    )
                     breaks = classifier.bins.tolist()
                     TierList.objects.create(
                         dataset=dataset,
@@ -236,10 +240,14 @@ def create_tier_lists_from_geojson(dataset):
                     )
                     print(f"Created natural breaks tier list for field {field_name}")
                 except Exception as e:
-                    print(f"Error creating natural breaks tier list for field {field_name}: {e}")
+                    print(
+                        f"Error creating natural breaks tier list for field {field_name}: {e}"
+                    )
 
                 try:
-                    classifier = mapclassify.Percentiles(values, pct=[1, 10, 50, 90, 99, 100])
+                    classifier = mapclassify.Percentiles(
+                        values, pct=[1, 10, 50, 90, 99, 100]
+                    )
                     breaks = classifier.bins.tolist()
                     TierList.objects.create(
                         dataset=dataset,
@@ -249,7 +257,9 @@ def create_tier_lists_from_geojson(dataset):
                     )
                     print(f"Created percentile tier list for field {field_name}")
                 except Exception as e:
-                    print(f"Error creating percentile tier list for field {field_name}: {e}")
+                    print(
+                        f"Error creating percentile tier list for field {field_name}: {e}"
+                    )
 
             except Exception as e:
                 print(f"Error processing field {field_name}: {e}")
