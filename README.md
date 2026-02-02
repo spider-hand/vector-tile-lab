@@ -1,15 +1,18 @@
 # vector-tile-lab
 
-![demo](https://github.com/user-attachments/assets/ebff2459-c22a-440b-bc4c-b583be664e9a)
+![demo](https://github.com/user-attachments/assets/e2b46a80-8566-44d5-ae61-8c5362b32d95)
 
 [![Docker Build](https://github.com/spider-hand/vector-tile-lab/actions/workflows/docker-build.yml/badge.svg)](https://github.com/spider-hand/vector-tile-lab/actions/workflows/docker-build.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Vector Tile Lab is a local development tool for experimenting with your vector tiles. It lets you convert GeoJSON into vector tiles, tweak Tippecanoe parameters and visualize data through interactive UI.
+A local development tool for visualizing and experimenting with vector tiles
+
+It allows you to convert GeoJSON into vector tiles, tweak Tippecanoe parameters, and immediately see how those changes affect rendering through an interactive map-based UI.
 
 ## Features
-- Zero config - Launch with a single command, no manual setup required
-- Instant iteration - Adjust tile generation parameters and test outputs immediately
-- Visual insights - Compare tilesets through interactive charts and performance metrics
+
+- 🚀 **Zero configuration** - Launch everything with a single command. No manual setup required
+- 🗺️ **Interactive visualization** - Instantly preview generated vector tiles on an interactive map
+- ⚡ **Fast iteration** - Adjust Tippecanoe parameters and regenerate tiles without leaving the UI
 
 ## Quick Start
 
@@ -41,10 +44,12 @@ docker-compose up --build -d
 ```
 
 ## Contributing
+
 - Bug fix PRs are always welcome.
 - UI changes or new features should not be submitted without prior discussion. Please open an issue first to propose and discuss them.
 
 Thanks for your understanding and contributions.
 
 ## License
+
 [MIT](./LICENSE)
