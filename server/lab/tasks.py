@@ -39,12 +39,12 @@ def run_tippecanoe_with_progress(
         progress = subprocess.Popen(
             cmd,
             stderr=subprocess.PIPE,
-            text=True,
-            bufsize=1,
+            text=False,
+            bufsize=0,
         )
 
-        buffer = ""
-        pattern = re.compile(r"(\d+(\.\d+)?)%")
+        buffer = b""
+        pattern = re.compile(rb"(\d+(\.\d+)?)%")
         last_progress = 0
         collected_err = []
 
@@ -54,16 +54,16 @@ def run_tippecanoe_with_progress(
                 break
             buffer += char
 
-            if char in ["\n", "\r"]:
+            if char in [b"\n", b"\r"]:
                 line = buffer.strip()
-                buffer = ""
+                buffer = b""
                 if not line:
                     continue
 
-                collected_err.append(line)
+                collected_err.append(line.decode("utf-8", errors="ignore"))
                 match = pattern.search(line)
                 if match:
-                    percentage = float(match.group(1))
+                    percentage = float(match.group(1).decode())
                     rounded = int((percentage // 10) * 10)
                     if rounded > last_progress:
                         redis_client.hset(
@@ -441,7 +441,19 @@ def process_uploaded_shapefile(dataset_id, dataset_name):
 
         print("Converting shapefile to GeoJSON ...")
 
-        ogr2ogr_cmd = ["ogr2ogr", "-f", "GeoJSON", geojson_path, shp_path]
+        ogr2ogr_cmd = [
+            "ogr2ogr",
+            "-f",
+            "GeoJSON",
+            "-oo",
+            "ENCODING=CP932",
+            "-lco",
+            "ENCODING=UTF-8",
+            "-t_srs",
+            "EPSG:4326",
+            geojson_path,
+            shp_path,
+        ]
 
         result = subprocess.run(
             ogr2ogr_cmd,
