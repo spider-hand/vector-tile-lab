@@ -24,21 +24,15 @@
                 </SelectContent>
               </Select>
             </div>
-            <LabeledSwitch
-              v-model="dropDensestAsNeeded"
+            <LabeledSwitch v-model="dropDensestAsNeeded"
               tooltip-text="If the tiles are too big at low zoom levels, drop the least-visible features to allow tiles to be created with those features that remain"
-              label-text="Drop densest as needed"
-            />
-            <LabeledSwitch
-              v-model="coalesceDensestAsNeeded"
+              label-text="Drop densest as needed" />
+            <LabeledSwitch v-model="coalesceDensestAsNeeded"
               tooltip-text="If the tiles are too big at low or medium zoom levels, merge as many features together as are necessary to allow tiles to be created with those features that are still distinguished"
-              label-text="Coalesce densest as needed"
-            />
-            <LabeledSwitch
-              v-model="extendZoomsIfStillDropping"
+              label-text="Coalesce densest as needed" />
+            <LabeledSwitch v-model="extendZoomsIfStillDropping"
               tooltip-text="If even the tiles at high zoom levels are too big, keep adding zoom levels until one is reached that can represent all the features"
-              label-text="Extend zooms if still dropping"
-            />
+              label-text="Extend zooms if still dropping" />
             <Button @click="handleGenerate" :disabled="!dataset || isCreatingTileset || showProgress" class="h-8">
               <LoaderCircle v-if="isCreatingTileset" class="h-3 w-3 animate-spin mr-2" />
               {{ isCreatingTileset ? 'Generating...' : 'Generate' }}
@@ -96,14 +90,7 @@
             </TableBody>
           </Table>
         </div>
-        <div v-else class="text-center py-8 text-sm text-muted-foreground">
-          <div class="flex flex-col items-center gap-2">
-            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-              <PackageSearch />
-            </div>
-            <p>No tileset available</p>
-          </div>
-        </div>
+        <EmptyState v-else message="No tileset available" />
       </div>
     </div>
   </BaseSidebar>
@@ -118,12 +105,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { LoaderCircle, CheckCircle, AlertCircle, PackageSearch } from 'lucide-vue-next'
+import { LoaderCircle, CheckCircle, AlertCircle } from 'lucide-vue-next'
 import { useSelectedData } from '@/composables/useSelectedData'
 import { useDatasetQuery } from '@/composables/useDatasetQuery'
 import useTilesetQuery from '@/composables/useTilesetQuery'
 import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
+import EmptyState from './EmptyState.vue'
 
 defineEmits<{
   close: []

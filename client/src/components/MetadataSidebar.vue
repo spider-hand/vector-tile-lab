@@ -1,55 +1,28 @@
 <template>
   <BaseSidebar @close="$emit('close')" title="Metadata">
     <div class="flex-1">
-      <div v-if="!data" class="text-center py-8 text-sm text-muted-foreground">
-        <div class="flex flex-col items-center gap-2">
-          <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-            <PackageSearch />
-          </div>
-          <p>No tileset available</p>
-        </div>
-      </div>
+      <EmptyState v-if="!data" message="No tileset available" />
       <div v-else class="flex flex-col gap-4">
-        <div class="bg-gray-50 rounded-lg p-4">
-          <h3 class="font-medium mb-3">Basic Information</h3>
+        <MetadataSectionCard title="Basic Information">
           <div class="flex flex-col gap-2 text-xs">
-            <div>
-              <span class="text-muted-foreground">File Name:</span>
-              <p class="font-medium truncate">{{ filename }}</p>
-            </div>
-            <div>
-              <span class="text-muted-foreground">Format:</span>
-              <p class="font-medium">{{ data.metadata.format?.toUpperCase() ?? 'PMTiles' }}</p>
-            </div>
-            <div>
-              <span class="text-muted-foreground">Version:</span>
-              <p class="font-medium">{{ data.metadata.version ?? 'N/A' }}</p>
-            </div>
-            <div>
-              <span class="text-muted-foreground">Generator:</span>
-              <p class="font-medium">{{ data.metadata.generator ?? 'N/A' }}</p>
-            </div>
+            <LabeledValue label="File Name" :value="filename" truncate />
+            <LabeledValue label="Format" :value="data.metadata.format" />
+            <LabeledValue label="Version" :value="data.metadata.version" />
+            <LabeledValue label="Generator" :value="data.metadata.generator" />
+            <LabeledValue v-if="data.metadata.generator_options" label="Generator Options"
+              :value="data.metadata.generator_options" mono />
           </div>
-        </div>
-        <div class="bg-blue-50 rounded-lg p-4">
-          <h3 class="font-medium mb-3">Zoom Levels & Tile Estimates</h3>
+        </MetadataSectionCard>
+
+        <MetadataSectionCard title="Zoom & Tile Estimates">
           <div class="flex flex-col gap-2">
             <div class="grid grid-cols-2 text-xs">
-              <div>
-                <span class="text-muted-foreground">Min Zoom:</span>
-                <p class="font-medium">{{ data.header.min_zoom }}</p>
-              </div>
-              <div>
-                <span class="text-muted-foreground">Max Zoom:</span>
-                <p class="font-medium">{{ data.header.max_zoom }}</p>
-              </div>
+              <LabeledValue label="Min Zoom" :value="data.header.min_zoom" />
+              <LabeledValue label="Max Zoom" :value="data.header.max_zoom" />
             </div>
-            <div>
-              <span class="text-muted-foreground text-xs">Estimated Total Tiles:</span>
-              <p class="text-lg font-bold text-blue-700">{{ estimatedTotalTiles.toLocaleString() }}</p>
-            </div>
-            <div class="flex flex-col gap-1">
-              <span class="text-muted-foreground text-xs">Tiles per Zoom Level:</span>
+            <LabeledValue class="text-xs" label="Estimated Total Tiles" :value="estimatedTotalTiles.toLocaleString()" />
+            <div class="flex flex-col gap-1 text-xs">
+              <span class="text-muted-foreground">Tiles per Zoom Level:</span>
               <div class="flex flex-col gap-1">
                 <div v-for="zoomData in tilesPerZoom" :key="zoomData.zoom" class="flex justify-between text-xs">
                   <span>Zoom {{ zoomData.zoom }}:</span>
@@ -58,70 +31,30 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="bg-purple-50 rounded-lg p-4">
-          <h3 class="font-medium mb-3">Vector Layers</h3>
+        </MetadataSectionCard>
+
+        <MetadataSectionCard title="Vector Layers">
           <div v-for="layer in data.metadata.vector_layers" :key="layer.id" class="flex flex-col gap-3">
             <div class="flex flex-col gap-2 text-xs">
-              <div>
-                <span class="text-muted-foreground">ID:</span>
-                <p class="font-medium truncate">{{ layer.id }}</p>
-              </div>
-              <div>
-                <span class="text-muted-foreground">Geometry:</span>
-                <p class="font-medium">{{ getLayerGeometry(layer.id) }}</p>
-              </div>
-              <div>
-                <span class="text-muted-foreground">Features:</span>
-                <p class="font-medium">{{ getLayerFeatureCount(layer.id).toLocaleString() }}</p>
-              </div>
+              <LabeledValue label="ID" :value="layer.id" truncate />
+              <LabeledValue label="Geometry" :value="getLayerGeometry(layer.id)" />
+              <LabeledValue label="Features" :value="getLayerFeatureCount(layer.id).toLocaleString()" />
             </div>
-            <div class="flex flex-col">
-              <span class="text-muted-foreground text-xs">Fields ({{ Object.keys(layer.fields ?? {}).length
-                }}):</span>
-              <div class="flex flex-wrap gap-1">
-                <span v-for="(type, field) in layer.fields" :key="field"
-                  class="inline-block bg-purple-100 text-purple-900 rounded text-xs p-1">
-                  {{ field }} <span class="text-purple-700">({{ type }})</span>
+            <div class="flex flex-col gap-1 text-xs">
+              <span class="text-muted-foreground">Fields ({{ Object.keys(layer.fields ?? {}).length }}):</span>
+              <div class="flex flex-wrap gap-2 rounded">
+                <span v-for="(type, field) in layer.fields" :key="field" class="inline-block rounded text-xs">
+                  {{ field }} <span>({{ type }})</span>
                 </span>
               </div>
             </div>
           </div>
-        </div>
-        <div v-if="data.metadata.generator_options || data.metadata.strategies" class="bg-yellow-50 rounded-lg p-4">
-          <h3 class="font-medium mb-3">Generation Details</h3>
-          <div class="flex flex-col gap-3">
-            <div v-if="data.metadata.generator_options" class="flex flex-col">
-              <span class="text-muted-foreground text-xs">Generator Options:</span>
-              <p class="text-xs font-mono bg-white rounded border break-all p-1">
-                {{ data.metadata.generator_options }}
-              </p>
-            </div>
-            <div v-if="data.metadata.strategies && data.metadata.strategies.length > 0" class="flex flex-col">
-              <span class="text-xs text-muted-foreground">Optimization Strategies:</span>
-              <div class="max-h-32 overflow-y-auto">
-                <div v-for="(strategy, index) in data.metadata.strategies" :key="index"
-                  class="text-xs bg-white rounded border p-1 flex flex-col gap-1">
-                  <span class="font-medium">Zoom {{ index }}:</span>
-                  <span v-if="strategy.detail_reduced">
-                    Detail reduced: {{ strategy.detail_reduced }}x
-                  </span>
-                  <span v-if="strategy.tiny_polygons">
-                    Tiny polygons: {{ strategy.tiny_polygons.toLocaleString() }}
-                  </span>
-                  <span v-if="strategy.tile_size_desired">
-                    Target size: {{ (strategy.tile_size_desired / 1024).toFixed(1) }}KB
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-if="dataStats.length > 0" class="bg-orange-50 rounded-lg p-4">
-          <h3 class="font-medium mb-3">Data Statistics</h3>
+        </MetadataSectionCard>
+
+        <MetadataSectionCard v-if="dataStats.length > 0" title="Data Statistics">
           <div class="flex flex-col">
-            <div v-for="stat in dataStats" :key="stat.field" class="border-b border-orange-200 py-2 last:border-0">
-              <h4 class="text-sm font-medium text-orange-900 mb-1">{{ stat.field }}</h4>
+            <div v-for="stat in dataStats" :key="stat.field" class="flex flex-col gap-1 border-b py-2 last:border-0">
+              <h4 class="text-sm font-medium">{{ stat.field }}</h4>
               <div class="grid grid-cols-2 gap-1 text-xs">
                 <div>
                   <span class="text-muted-foreground">Type:</span>
@@ -142,7 +75,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </MetadataSectionCard>
       </div>
     </div>
   </BaseSidebar>
@@ -151,7 +84,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import BaseSidebar from './BaseSidebar.vue';
-import { PackageSearch } from 'lucide-vue-next';
+import MetadataSectionCard from './MetadataSectionCard.vue';
+import LabeledValue from './LabeledValue.vue';
+import EmptyState from './EmptyState.vue'
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
 import type { DataStat, TileMetadataResponse } from '@/types';

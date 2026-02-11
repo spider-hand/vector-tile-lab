@@ -1,40 +1,18 @@
 <template>
   <BaseSidebar @close="$emit('close')" title="Tileset">
     <div class="flex flex-col gap-4">
-      <div v-if="!tileset" class="text-center py-8 text-sm text-muted-foreground">
-        <div class="flex flex-col items-center gap-2">
-          <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-            <PackageSearch />
-          </div>
-          <p>No tileset available</p>
-        </div>
-      </div>
+      <EmptyState v-if="!tileset" message="No tileset available" />
       <div v-else class="flex flex-col gap-6">
         <div class="flex flex-col gap-3">
           <h3 class="text-sm font-medium">Style by Attribute</h3>
           <div v-if="tierLists && tierLists.length > 0" class="flex flex-col gap-3">
-            <LabeledSelect
-              v-model="selectedAttributeField"
-              label="Attribute"
-              placeholder="Choose an attribute..."
-              :options="attributeFieldOptions"
-              @update:model-value="onAttributeFieldChange"
-            />
-            <LabeledSelect
-              v-if="selectedAttributeField"
-              v-model="selectedMethod"
-              label="Classification Method"
-              placeholder="Choose a method..."
-              :options="availableMethods"
-              @update:model-value="applySelectedAttribute"
-            />
-            <LabeledSelect
-              v-if="selectedAttributeField && selectedMethod"
-              v-model="selectedColorTheme"
-              label="Color Theme"
-              placeholder="Choose a color theme..."
-              :options="COLOR_THEME_LIST"
-            />
+            <LabeledSelect v-model="selectedAttributeField" label="Attribute" placeholder="Choose an attribute..."
+              :options="attributeFieldOptions" @update:model-value="onAttributeFieldChange" />
+            <LabeledSelect v-if="selectedAttributeField" v-model="selectedMethod" label="Classification Method"
+              placeholder="Choose a method..." :options="availableMethods"
+              @update:model-value="applySelectedAttribute" />
+            <LabeledSelect v-if="selectedAttributeField && selectedMethod" v-model="selectedColorTheme"
+              label="Color Theme" placeholder="Choose a color theme..." :options="COLOR_THEME_LIST" />
             <div v-if="selectedTierList" class="flex flex-col gap-2">
               <label class="text-xs font-medium text-muted-foreground">Legend</label>
               <div class="grid grid-cols-1 gap-2">
@@ -65,9 +43,6 @@
               </div>
             </div>
           </div>
-          <div v-else class="text-center py-4 text-sm text-muted-foreground">
-            No vector layers found in this tileset.
-          </div>
         </div>
       </div>
     </div>
@@ -76,7 +51,6 @@
 
 <script setup lang="ts">
 import BaseSidebar from './BaseSidebar.vue'
-import { PackageSearch } from 'lucide-vue-next'
 import { Switch } from '@/components/ui/switch'
 import LabeledSelect from './LabeledSelect.vue'
 import { useSelectedData } from '@/composables/useSelectedData'
@@ -86,6 +60,7 @@ import { useLayerStyles } from '@/composables/useLayerStyles'
 import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
 import { LAYER_TYPES, COLOR_THEME_LIST, CLASSIFICATION_METHOD_LIST, getTierColors } from '@/consts'
+import EmptyState from './EmptyState.vue'
 
 defineEmits<{
   close: []
