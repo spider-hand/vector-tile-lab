@@ -1,51 +1,39 @@
 <template>
-  <SidebarProvider>
-    <Sidebar style="
+  <div class="fixed top-4 left-4 z-[999] w-[200px]">
+    <Card class="p-2">
+      <div class="flex flex-col gap-1">
+        <Button
+          v-for="item in items"
+          :key="item.title"
+          :variant="activeItem === item.title ? 'secondary' : 'ghost'"
+          class="justify-start gap-2"
+          @click="handleMenuClick(item.title)"
+        >
+          <component :is="item.icon" class="h-4 w-4" />
+          <span>{{ item.title }}</span>
+        </Button>
+      </div>
+    </Card>
+  </div>
+  <main>
+    <router-view />
+  </main>
 
---sidebar-width: 10rem; --sidebar-width-mobile: 10rem;
-
- position: relative; z-index: 999;">
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem v-for="item in items" :key="item.title">
-                <SidebarMenuButton @click="handleMenuClick(item.title)" :is-active="activeItem === item.title">
-                  <component :is="item.icon" />
-                  <span>{{ item.title }}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
-    <main>
-      <router-view />
-    </main>
-
-    <UploadSidebar :open="uploadSidebarOpen" @update:open="handleMenuClick('Upload')" />
-    <TilesetSidebar :open="tilesetSidebarOpen" @update:open="handleMenuClick('Tilesets')" />
-    <MetadataSidebar :open="metadataSidebarOpen" @update:open="handleMenuClick('Metadata')" />
-    <StyleSidebar :open="styleSidebarOpen" @update:open="handleMenuClick('Style')" />
-  </SidebarProvider>
+  <UploadSidebar v-show="uploadSidebarOpen" @close="activeItem = null" />
+  <TilesetSidebar v-show="tilesetSidebarOpen" @close="activeItem = null" />
+  <MetadataSidebar v-show="metadataSidebarOpen" @close="activeItem = null" />
+  <StyleSidebar v-show="styleSidebarOpen" @close="activeItem = null" />
 </template>
 
 <script setup lang="ts">
 import { computed, ref, type Component } from 'vue'
-import Sidebar from '@/components/ui/sidebar/Sidebar.vue';
-import SidebarContent from '@/components/ui/sidebar/SidebarContent.vue';
-import SidebarGroup from '@/components/ui/sidebar/SidebarGroup.vue';
-import SidebarGroupContent from '@/components/ui/sidebar/SidebarGroupContent.vue';
-import SidebarMenu from '@/components/ui/sidebar/SidebarMenu.vue';
-import SidebarMenuButton from '@/components/ui/sidebar/SidebarMenuButton.vue';
-import SidebarMenuItem from '@/components/ui/sidebar/SidebarMenuItem.vue';
-import SidebarProvider from '@/components/ui/sidebar/SidebarProvider.vue';
-import UploadSidebar from '@/components/UploadSidebar.vue';
-import MetadataSidebar from '@/components/MetadataSidebar.vue';
-import { FileText, Layers, Upload, WandSparkles } from 'lucide-vue-next';
-import TilesetSidebar from '@/components/TilesetSidebar.vue';
-import StyleSidebar from '@/components/StyleSidebar.vue';
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import UploadSidebar from '@/components/UploadSidebar.vue'
+import MetadataSidebar from '@/components/MetadataSidebar.vue'
+import TilesetSidebar from '@/components/TilesetSidebar.vue'
+import StyleSidebar from '@/components/StyleSidebar.vue'
+import { FileText, Layers, Upload, WandSparkles } from 'lucide-vue-next'
 
 type MenuItem = 'Upload' | 'Tilesets' | 'Metadata' | 'Style';
 const items: Array<{ title: MenuItem; icon: Component }> = [

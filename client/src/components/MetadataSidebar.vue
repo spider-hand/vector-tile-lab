@@ -1,5 +1,5 @@
 <template>
-  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Metadata">
+  <BaseSidebar @close="$emit('close')" title="Metadata">
     <div class="flex-1">
       <div v-if="!data" class="text-center py-8 text-sm text-muted-foreground">
         <div class="flex flex-col items-center gap-2">
@@ -157,12 +157,8 @@ import { useSelectedData } from '@/composables/useSelectedData';
 import type { DataStat, TileMetadataResponse } from '@/types';
 import { calculateTilesAtZoom } from '@/utils';
 
-defineProps<{
-  open: boolean
-}>();
-
 defineEmits<{
-  'update:open': [value: boolean]
+  close: []
 }>()
 
 const { selectedDatasetId, selectedTilesetId } = useSelectedData();

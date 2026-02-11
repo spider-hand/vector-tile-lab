@@ -1,5 +1,5 @@
 <template>
-  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Tilesets">
+  <BaseSidebar @close="$emit('close')" title="Tilesets">
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-3">
         <h3 class="text-sm font-medium">Generate New Tileset</h3>
@@ -15,7 +15,7 @@
                 <SelectTrigger class="h-8">
                   <SelectValue placeholder="Select maximum zoom" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent class="z-[9999]">
                   <SelectItem value="g">g (guess)</SelectItem>
                   <SelectItem v-for="zoom in Array.from({ length: 23 }, (_, i) => i)" :key="zoom"
                     :value="zoom.toString()">
@@ -125,12 +125,8 @@ import useTilesetQuery from '@/composables/useTilesetQuery'
 import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
 
-defineProps<{
-  open: boolean
-}>()
-
 defineEmits<{
-  'update:open': [value: boolean]
+  close: []
 }>()
 
 const { selectedDatasetId, selectedTilesetId, setSelectedTileset } = useSelectedData()

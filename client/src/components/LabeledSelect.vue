@@ -5,7 +5,7 @@
       <SelectTrigger>
         <SelectValue :placeholder="placeholder" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent class="z-[9999]">
         <SelectItem v-for="option in options" :key="option.value" :value="option.value">
           {{ option.label }}
         </SelectItem>

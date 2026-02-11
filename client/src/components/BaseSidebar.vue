@@ -1,25 +1,25 @@
 <template>
-  <Sheet :open="open" @update:open="(value: boolean) => $emit('update:open', value)" :modal="false">
-    <SheetContent side="left" class="flex flex-col" :class="width" :style="{ marginLeft: sidebarMargin }"
-      @interact-outside="(e) => e.preventDefault()">
-      <SheetHeader>
-        <SheetTitle>{{ title }}</SheetTitle>
-      </SheetHeader>
-
-      <div class="flex flex-col flex-1 min-h-0 rounded-lg px-4 pb-4 overflow-y-auto sidebar-scrollbar">
+  <div class="fixed top-4 left-[224px] bottom-4 z-[998]" :class="width">
+    <Card class="flex flex-col h-full py-4">
+      <CardHeader class="flex flex-row items-center justify-between space-y-0 px-4">
+        <CardTitle>{{ title }}</CardTitle>
+        <Button variant="ghost" size="icon" class="h-6 w-6" @click="$emit('close')">
+          <X class="h-4 w-4" />
+        </Button>
+      </CardHeader>
+      <CardContent class="flex-1 min-h-0 overflow-y-auto sidebar-scrollbar px-4">
         <slot />
-      </div>
-    </SheetContent>
-  </Sheet>
+      </CardContent>
+    </Card>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useSidebar } from '@/components/ui/sidebar/utils'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { X } from 'lucide-vue-next'
 
 withDefaults(defineProps<{
-  open: boolean
   title: string
   width?: string
 }>(), {
@@ -27,17 +27,8 @@ withDefaults(defineProps<{
 })
 
 defineEmits<{
-  'update:open': [value: boolean]
+  close: []
 }>()
-
-const { open: sidebarOpen, isMobile } = useSidebar()
-
-const sidebarMargin = computed(() => {
-  if (isMobile.value) {
-    return '0'
-  }
-  return sidebarOpen.value ? '10rem' : '0'
-})
 </script>
 
 <style scoped>

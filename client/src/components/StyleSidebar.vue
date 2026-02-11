@@ -1,5 +1,5 @@
 <template>
-  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Style">
+  <BaseSidebar @close="$emit('close')" title="Style">
     <div class="flex flex-col gap-4">
       <div v-if="!tileset" class="text-center py-8 text-sm text-muted-foreground">
         <div class="flex flex-col items-center gap-2">
@@ -87,12 +87,8 @@ import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
 import { LAYER_TYPES, COLOR_THEME_LIST, CLASSIFICATION_METHOD_LIST, getTierColors } from '@/consts'
 
-defineProps<{
-  open: boolean
-}>()
-
 defineEmits<{
-  'update:open': [value: boolean]
+  close: []
 }>()
 
 const { selectedDatasetId, selectedTilesetId } = useSelectedData()

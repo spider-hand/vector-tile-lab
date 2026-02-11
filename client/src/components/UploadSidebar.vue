@@ -1,5 +1,5 @@
 <template>
-  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Upload">
+  <BaseSidebar @close="emits('close')" title="Upload">
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
         <h3 class="text-sm font-medium">File Format</h3>
@@ -144,12 +144,8 @@ import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
 import Separator from './ui/separator/Separator.vue'
 
-defineProps<{
-  open: boolean
-}>()
-
 const emits = defineEmits<{
-  'update:open': [value: boolean]
+  close: []
 }>()
 
 const selectedFile = ref<File | null>(null)
@@ -273,7 +269,7 @@ watch(() => progress.value?.status, (newVal, oldVal) => {
     setTimeout(() => {
       clearSelectedFile()
       toast('Processing complete! Your dataset is now available.', { position: 'top-center' })
-      emits('update:open', false)
+      emits('close')
     }, 3000)
   } else if (oldVal === 'in_progress' && newVal === 'failed') {
     toast.error('Failed to process dataset', { position: 'top-center' })
