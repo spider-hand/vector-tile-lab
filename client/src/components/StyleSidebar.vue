@@ -1,6 +1,5 @@
 <template>
-  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Style Tileset"
-    description="Manage and configure tileset styles">
+  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Style">
     <div class="flex flex-col gap-4">
       <div v-if="!tileset" class="text-center py-8 text-sm text-muted-foreground">
         <div class="flex flex-col items-center gap-2">
@@ -14,44 +13,28 @@
         <div class="flex flex-col gap-3">
           <h3 class="text-sm font-medium">Style by Attribute</h3>
           <div v-if="tierLists && tierLists.length > 0" class="flex flex-col gap-3">
-            <div class="flex flex-col gap-2">
-              <Select v-model="selectedAttributeField" @update:model-value="onAttributeFieldChange">
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose an attribute..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem v-for="field in uniqueFields" :key="field" :value="field">
-                    {{ field }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div v-if="selectedAttributeField" class="flex flex-col gap-2">
-              <label class="text-xs font-medium text-muted-foreground">Classification Method</label>
-              <Select v-model="selectedMethod" @update:model-value="applySelectedAttribute">
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a method..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem v-for="method in availableMethods" :key="method.value" :value="method.value">
-                    {{ method.label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div v-if="selectedAttributeField && selectedMethod" class="flex flex-col gap-2">
-              <label class="text-xs font-medium text-muted-foreground">Color Theme</label>
-              <Select v-model="selectedColorTheme">
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a color theme..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem v-for="theme in COLOR_THEME_LIST" :key="theme.value" :value="theme.value">
-                    {{ theme.label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <LabeledSelect
+              v-model="selectedAttributeField"
+              label="Attribute"
+              placeholder="Choose an attribute..."
+              :options="attributeFieldOptions"
+              @update:model-value="onAttributeFieldChange"
+            />
+            <LabeledSelect
+              v-if="selectedAttributeField"
+              v-model="selectedMethod"
+              label="Classification Method"
+              placeholder="Choose a method..."
+              :options="availableMethods"
+              @update:model-value="applySelectedAttribute"
+            />
+            <LabeledSelect
+              v-if="selectedAttributeField && selectedMethod"
+              v-model="selectedColorTheme"
+              label="Color Theme"
+              placeholder="Choose a color theme..."
+              :options="COLOR_THEME_LIST"
+            />
             <div v-if="selectedTierList" class="flex flex-col gap-2">
               <label class="text-xs font-medium text-muted-foreground">Legend</label>
               <div class="grid grid-cols-1 gap-2">
@@ -95,13 +78,7 @@
 import BaseSidebar from './BaseSidebar.vue'
 import { PackageSearch } from 'lucide-vue-next'
 import { Switch } from '@/components/ui/switch'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
+import LabeledSelect from './LabeledSelect.vue'
 import { useSelectedData } from '@/composables/useSelectedData'
 import useTilesetQuery from '@/composables/useTilesetQuery'
 import { useTierListQuery } from '@/composables/useTierListQuery'
@@ -110,12 +87,9 @@ import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
 import { LAYER_TYPES, COLOR_THEME_LIST, CLASSIFICATION_METHOD_LIST, getTierColors } from '@/consts'
 
-defineProps({
-  open: {
-    type: Boolean,
-    required: true
-  }
-})
+defineProps<{
+  open: boolean
+}>()
 
 defineEmits<{
   'update:open': [value: boolean]
@@ -132,6 +106,10 @@ const selectedMethod = ref<string>('')
 const uniqueFields = computed(() => {
   if (!tierLists.value) return []
   return Array.from(new Set(tierLists.value.map(tl => tl.field)))
+})
+
+const attributeFieldOptions = computed(() => {
+  return uniqueFields.value.map(field => ({ value: field, label: field }))
 })
 
 const availableMethods = computed(() => {

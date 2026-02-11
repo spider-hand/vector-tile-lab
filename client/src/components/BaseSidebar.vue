@@ -4,7 +4,6 @@
       @interact-outside="(e) => e.preventDefault()">
       <SheetHeader>
         <SheetTitle>{{ title }}</SheetTitle>
-        <SheetDescription>{{ description }}</SheetDescription>
       </SheetHeader>
 
       <div class="flex flex-col flex-1 min-h-0 rounded-lg px-4 pb-4 overflow-y-auto sidebar-scrollbar">
@@ -17,25 +16,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useSidebar } from '@/components/ui/sidebar/utils'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 
-defineProps({
-  open: {
-    type: Boolean,
-    required: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  width: {
-    type: String,
-    default: 'w-80'
-  }
+withDefaults(defineProps<{
+  open: boolean
+  title: string
+  width?: string
+}>(), {
+  width: 'w-80'
 })
 
 defineEmits<{

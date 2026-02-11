@@ -1,6 +1,5 @@
 <template>
-  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Tilesets"
-    description="Manage and configure your vector tilesets">
+  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Tilesets">
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-3">
         <h3 class="text-sm font-medium">Generate New Tileset</h3>
@@ -10,10 +9,8 @@
         <TooltipProvider>
           <div class="flex flex-col gap-3 p-4 border rounded-lg">
             <div class="flex flex-col gap-1">
-              <InfoTooltipLabel
-                tooltip-text="The highest zoom level for which tiles are generated (default 14)"
-                label-text="Maximum Zoom"
-              />
+              <InfoTooltipLabel tooltip-text="The highest zoom level for which tiles are generated (default 14)"
+                label-text="Maximum Zoom" />
               <Select v-model="maximumZoom">
                 <SelectTrigger class="h-8">
                   <SelectValue placeholder="Select maximum zoom" />
@@ -27,28 +24,21 @@
                 </SelectContent>
               </Select>
             </div>
-            <div class="flex items-center justify-between">
-              <InfoTooltipLabel
-                tooltip-text="If the tiles are too big at low zoom levels, drop the least-visible features to allow tiles to be created with those features that remain"
-                label-text="Drop densest as needed"
-              />
-              <Switch :model-value="dropDensestAsNeeded" @update:model-value="dropDensestAsNeeded = $event" />
-            </div>
-            <div class="flex items-center justify-between">
-              <InfoTooltipLabel
-                tooltip-text="If the tiles are too big at low or medium zoom levels, merge as many features together as are necessary to allow tiles to be created with those features that are still distinguished"
-                label-text="Coalesce densest as needed"
-              />
-              <Switch :model-value="coalesceDensestAsNeeded" @update:model-value="coalesceDensestAsNeeded = $event" />
-            </div>
-            <div class="flex items-center justify-between">
-              <InfoTooltipLabel
-                tooltip-text="If even the tiles at high zoom levels are too big, keep adding zoom levels until one is reached that can represent all the features"
-                label-text="Extend zooms if still dropping"
-              />
-              <Switch :model-value="extendZoomsIfStillDropping"
-                @update:model-value="extendZoomsIfStillDropping = $event" />
-            </div>
+            <LabeledSwitch
+              v-model="dropDensestAsNeeded"
+              tooltip-text="If the tiles are too big at low zoom levels, drop the least-visible features to allow tiles to be created with those features that remain"
+              label-text="Drop densest as needed"
+            />
+            <LabeledSwitch
+              v-model="coalesceDensestAsNeeded"
+              tooltip-text="If the tiles are too big at low or medium zoom levels, merge as many features together as are necessary to allow tiles to be created with those features that are still distinguished"
+              label-text="Coalesce densest as needed"
+            />
+            <LabeledSwitch
+              v-model="extendZoomsIfStillDropping"
+              tooltip-text="If even the tiles at high zoom levels are too big, keep adding zoom levels until one is reached that can represent all the features"
+              label-text="Extend zooms if still dropping"
+            />
             <Button @click="handleGenerate" :disabled="!dataset || isCreatingTileset || showProgress" class="h-8">
               <LoaderCircle v-if="isCreatingTileset" class="h-3 w-3 animate-spin mr-2" />
               {{ isCreatingTileset ? 'Generating...' : 'Generate' }}
@@ -123,9 +113,9 @@
 import { ref, watch } from 'vue'
 import BaseSidebar from './BaseSidebar.vue'
 import InfoTooltipLabel from './InfoTooltipLabel.vue'
+import LabeledSwitch from './LabeledSwitch.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { LoaderCircle, CheckCircle, AlertCircle, PackageSearch } from 'lucide-vue-next'
@@ -135,12 +125,9 @@ import useTilesetQuery from '@/composables/useTilesetQuery'
 import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
 
-defineProps({
-  open: {
-    type: Boolean,
-    required: true
-  }
-})
+defineProps<{
+  open: boolean
+}>()
 
 defineEmits<{
   'update:open': [value: boolean]

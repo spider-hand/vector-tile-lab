@@ -61,7 +61,7 @@ const tilesetSidebarOpen = computed(() => activeItem.value === 'Tilesets')
 const metadataSidebarOpen = computed(() => activeItem.value === 'Metadata')
 const styleSidebarOpen = computed(() => activeItem.value === 'Style')
 
-function handleMenuClick(title: MenuItem) {
+const handleMenuClick = (title: MenuItem) => {
   if (activeItem.value === title) {
     activeItem.value = null;
   } else {

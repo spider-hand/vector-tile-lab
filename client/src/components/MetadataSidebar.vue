@@ -1,6 +1,5 @@
 <template>
-  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Metadata"
-    description="Analysis of PMTiles">
+  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Metadata">
     <div class="flex-1">
       <div v-if="!data" class="text-center py-8 text-sm text-muted-foreground">
         <div class="flex flex-col items-center gap-2">
@@ -79,7 +78,7 @@
             </div>
             <div class="flex flex-col">
               <span class="text-muted-foreground text-xs">Fields ({{ Object.keys(layer.fields ?? {}).length
-              }}):</span>
+                }}):</span>
               <div class="flex flex-wrap gap-1">
                 <span v-for="(type, field) in layer.fields" :key="field"
                   class="inline-block bg-purple-100 text-purple-900 rounded text-xs p-1">
@@ -158,12 +157,9 @@ import { useSelectedData } from '@/composables/useSelectedData';
 import type { DataStat, TileMetadataResponse } from '@/types';
 import { calculateTilesAtZoom } from '@/utils';
 
-defineProps({
-  open: {
-    type: Boolean,
-    required: true
-  }
-});
+defineProps<{
+  open: boolean
+}>();
 
 defineEmits<{
   'update:open': [value: boolean]

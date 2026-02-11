@@ -1,6 +1,5 @@
 <template>
-  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Upload Data"
-    description="Select a file from your device to display on the map.">
+  <BaseSidebar :open="open" @update:open="$emit('update:open', $event)" title="Upload">
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
         <h3 class="text-sm font-medium">File Format</h3>
@@ -19,15 +18,12 @@
       </div>
       <div class="flex flex-col gap-2">
         <div v-if="selectedFormat === 'geojson'">
-          <div v-if="!selectedFile"
-            class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
-            @click="triggerFileInput" @dragover.prevent @drop.prevent="handleDrop">
-            <CloudUpload class="mx-auto h-8 w-8 text-gray-400 mb-4" />
-            <p class="text-sm text-muted-foreground">
-              Click to upload or drag and drop your GeoJSON file
-            </p>
-            <input ref="fileInput" type="file" :accept="acceptedFileTypes" class="hidden" @change="handleFileSelect" />
-          </div>
+          <FileDropzone
+            v-if="!selectedFile"
+            accept=".geojson,.json"
+            description="Click to upload or drag and drop your GeoJSON file"
+            @files-selected="(files) => selectedFile = files[0]"
+          />
           <div v-if="selectedFile"
             class="border-2 border-solid border-green-300 bg-green-50 rounded-lg p-4 flex items-center justify-between">
             <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -41,16 +37,12 @@
           </div>
         </div>
         <div v-if="selectedFormat === 'shapefile'" class="flex flex-col gap-3">
-          <div
-            class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
-            @click="triggerFileInput" @dragover.prevent @drop.prevent="handleDrop">
-            <CloudUpload class="mx-auto h-8 w-8 text-gray-400 mb-4" />
-            <p class="text-sm text-muted-foreground mb-2">
-              Click to upload or drag and drop Shapefile components
-            </p>
-            <input ref="fileInput" type="file" :accept="acceptedFileTypes" class="hidden" @change="handleFileSelect"
-              multiple />
-          </div>
+          <FileDropzone
+            accept=".shp,.shx,.dbf,.prj,.cpg"
+            description="Click to upload or drag and drop Shapefile components"
+            multiple
+            @files-selected="handleShapefilesSelected"
+          />
           <div class="space-y-2">
             <h4 class="text-xs font-medium text-muted-foreground">Required Files</h4>
             <div class="grid grid-cols-1 gap-2">
@@ -139,6 +131,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import BaseSidebar from './BaseSidebar.vue'
+import FileDropzone from './FileDropzone.vue'
 import FileUploadItem from './FileUploadItem.vue'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -151,18 +144,14 @@ import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
 import Separator from './ui/separator/Separator.vue'
 
-defineProps({
-  open: {
-    type: Boolean,
-    required: true
-  }
-})
+defineProps<{
+  open: boolean
+}>()
 
 const emits = defineEmits<{
   'update:open': [value: boolean]
 }>()
 
-const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
 const selectedFiles = ref<{
   shp?: File
@@ -178,10 +167,6 @@ const selectedFormat = ref<'geojson' | 'shapefile'>('geojson')
 const { selectedDatasetId, selectedTilesetId, setSelectedDataset, setSelectedTileset } = useSelectedData()
 const { mutateOnCreateDataset, isCreatingDataset, isCreateDatasetSuccess, progress, isProgressError, datasets, isFetchingDatasets, refetchDatasets } = useDatasetQuery(selectedDatasetId, createdDatasetId)
 const { tilesets } = useTilesetQuery(selectedDatasetId, selectedTilesetId)
-
-const acceptedFileTypes = computed(() => {
-  return selectedFormat.value === 'geojson' ? '.geojson,.json' : '.shp,.shx,.dbf,.prj,.cpg'
-})
 
 const canUpload = computed(() => {
   if (selectedFormat.value === 'geojson') {
@@ -208,85 +193,28 @@ const { status, progressColors, progressTitle, progressDescription, progressPerc
   progressMessages.value
 )
 
-function triggerFileInput() {
-  fileInput.value?.click()
-}
-
-function clearSelectedFile() {
+const clearSelectedFile = () => {
   selectedFile.value = null
   selectedFiles.value = {}
   showProgress.value = false
   createdDatasetId.value = null
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
 }
 
-function handleFileSelect(event: Event) {
-  const target = event.target as HTMLInputElement
-  const files = target.files
-
-  if (selectedFormat.value === 'geojson') {
-    const file = files?.[0]
-    if (file && isValidFileType(file)) {
-      selectedFile.value = file
-    }
-  } else {
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        if (isValidFileType(file)) {
-          addShapefile(file)
-        }
-      }
+const handleShapefilesSelected = (files: File[]) => {
+  for (const file of files) {
+    const fileName = file.name.toLowerCase()
+    const extension = fileName.split('.').pop() as keyof typeof selectedFiles.value
+    if (['shp', 'shx', 'dbf', 'prj', 'cpg'].includes(extension)) {
+      selectedFiles.value[extension] = file
     }
   }
 }
 
-function isValidFileType(file: File): boolean {
-  const fileName = file.name.toLowerCase()
-  if (selectedFormat.value === 'geojson') {
-    return fileName.endsWith('.geojson') || fileName.endsWith('.json')
-  } else {
-    return fileName.endsWith('.shp') || fileName.endsWith('.shx') ||
-      fileName.endsWith('.dbf') || fileName.endsWith('.prj') ||
-      fileName.endsWith('.cpg')
-  }
-}
-
-function addShapefile(file: File) {
-  const fileName = file.name.toLowerCase()
-  const extension = fileName.split('.').pop() as keyof typeof selectedFiles.value
-
-  if (['shp', 'shx', 'dbf', 'prj', 'cpg'].includes(extension)) {
-    selectedFiles.value[extension] = file
-  }
-}
-
-function removeShapefile(extension: keyof typeof selectedFiles.value) {
+const removeShapefile = (extension: keyof typeof selectedFiles.value) => {
   selectedFiles.value[extension] = undefined
 }
 
-function handleDrop(event: DragEvent) {
-  const files = event.dataTransfer?.files
-  if (files && files.length > 0) {
-    if (selectedFormat.value === 'geojson') {
-      const file = files[0]
-      if (isValidFileType(file)) {
-        selectedFile.value = file
-      }
-    } else {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        if (isValidFileType(file)) {
-          addShapefile(file)
-        }
-      }
-    }
-  }
-}
-
-function handleUpload() {
+const handleUpload = () => {
   if (selectedFormat.value === 'geojson' && selectedFile.value) {
     const fileName = selectedFile.value.name.replace(/\.(geojson|json)$/, '')
 
@@ -318,7 +246,7 @@ function handleUpload() {
   }
 }
 
-function getFileName(filePath: string): string {
+const getFileName = (filePath: string): string => {
   return filePath.split('/').pop()?.replace(/\.(geojson|json|shp)$/i, '') || filePath
 }
 
