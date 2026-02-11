@@ -18,12 +18,9 @@
       </div>
       <div class="flex flex-col gap-2">
         <div v-if="selectedFormat === 'geojson'">
-          <FileDropzone
-            v-if="!selectedFile"
-            accept=".geojson,.json"
+          <FileDropzone v-if="!selectedFile" accept=".geojson,.json"
             description="Click to upload or drag and drop your GeoJSON file"
-            @files-selected="(files) => selectedFile = files[0]"
-          />
+            @files-selected="(files) => selectedFile = files[0]" />
           <div v-if="selectedFile"
             class="border-2 border-solid border-green-300 bg-green-50 rounded-lg p-4 flex items-center justify-between">
             <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -37,12 +34,9 @@
           </div>
         </div>
         <div v-if="selectedFormat === 'shapefile'" class="flex flex-col gap-3">
-          <FileDropzone
-            accept=".shp,.shx,.dbf,.prj,.cpg"
-            description="Click to upload or drag and drop Shapefile components"
-            multiple
-            @files-selected="handleShapefilesSelected"
-          />
+          <FileDropzone accept=".shp,.shx,.dbf,.prj,.cpg"
+            description="Click to upload or drag and drop Shapefile components" multiple
+            @files-selected="handleShapefilesSelected" />
           <div class="space-y-2">
             <h4 class="text-xs font-medium text-muted-foreground">Required Files</h4>
             <div class="grid grid-cols-1 gap-2">
@@ -269,7 +263,6 @@ watch(() => progress.value?.status, (newVal, oldVal) => {
     setTimeout(() => {
       clearSelectedFile()
       toast('Processing complete! Your dataset is now available.', { position: 'top-center' })
-      emits('close')
     }, 3000)
   } else if (oldVal === 'in_progress' && newVal === 'failed') {
     toast.error('Failed to process dataset', { position: 'top-center' })

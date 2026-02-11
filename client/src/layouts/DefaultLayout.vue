@@ -20,9 +20,9 @@
   </main>
 
   <UploadSidebar v-show="uploadSidebarOpen" @close="activeItem = null" />
-  <TilesetSidebar v-show="tilesetSidebarOpen" @close="activeItem = null" />
+  <TweakSidebar v-show="tweakSidebarOpen" @close="activeItem = null" />
   <MetadataSidebar v-show="metadataSidebarOpen" @close="activeItem = null" />
-  <StyleSidebar v-show="styleSidebarOpen" @close="activeItem = null" />
+  <TilesetSidebar v-show="tilesetSidebarOpen" @close="activeItem = null" />
 </template>
 
 <script setup lang="ts">
@@ -31,23 +31,23 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import UploadSidebar from '@/components/UploadSidebar.vue'
 import MetadataSidebar from '@/components/MetadataSidebar.vue'
+import TweakSidebar from '@/components/TweakSidebar.vue'
 import TilesetSidebar from '@/components/TilesetSidebar.vue'
-import StyleSidebar from '@/components/StyleSidebar.vue'
-import { FileText, Layers, Upload, WandSparkles } from 'lucide-vue-next'
+import { FileText, SlidersHorizontal, Upload, Layers } from 'lucide-vue-next'
 
-type MenuItem = 'Upload' | 'Tilesets' | 'Metadata' | 'Style';
+type MenuItem = 'Upload' | 'Tweak' | 'Metadata' | 'Tileset';
 const items: Array<{ title: MenuItem; icon: Component }> = [
   { title: 'Upload', icon: Upload },
-  { title: 'Tilesets', icon: Layers },
+  { title: 'Tweak', icon: SlidersHorizontal },
   { title: 'Metadata', icon: FileText },
-  { title: 'Style', icon: WandSparkles }
+  { title: 'Tileset', icon: Layers }
 ]
 
 const activeItem = ref<MenuItem | null>(null)
 const uploadSidebarOpen = computed(() => activeItem.value === 'Upload')
-const tilesetSidebarOpen = computed(() => activeItem.value === 'Tilesets')
+const tweakSidebarOpen = computed(() => activeItem.value === 'Tweak')
 const metadataSidebarOpen = computed(() => activeItem.value === 'Metadata')
-const styleSidebarOpen = computed(() => activeItem.value === 'Style')
+const tilesetSidebarOpen = computed(() => activeItem.value === 'Tileset')
 
 const handleMenuClick = (title: MenuItem) => {
   if (activeItem.value === title) {
