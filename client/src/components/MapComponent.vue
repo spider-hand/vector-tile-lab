@@ -28,6 +28,10 @@ const { layersVisibility, getLayerVisibility, tierStyleConfig } = useLayerStyles
 const initializeMap = () => {
   if (!mapRef.value || map.value) return;
 
+  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+  const tile = mapboxToken ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=${mapboxToken}` : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const attribution = mapboxToken ? '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>' : '©<a href="https://www.openstreetmap.org/copyright/ja">OpenStreetMap</a> contributors';
+
   map.value = new maplibregl.Map({
     container: mapRef.value as HTMLElement,
     style: {
@@ -36,10 +40,10 @@ const initializeMap = () => {
         'raster-tiles': {
           type: 'raster',
           tiles: [
-            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            tile,
           ],
           tileSize: 256,
-          attribution: '©<a href="https://www.openstreetmap.org/copyright/ja">OpenStreetMap</a> contributors',
+          attribution: attribution,
         }
       },
       layers: [{
