@@ -3,7 +3,7 @@
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-3">
         <h3 class="text-sm font-medium">Generate New Tileset</h3>
-        <div v-if="dataset" class="text-xs text-muted-foreground bg-muted px-4 py-2 rounded">
+        <div v-if="dataset" class="text-xs text-muted-foreground bg-muted/50 px-4 py-2 rounded">
           Dataset: {{ dataset.name }}
         </div>
         <TooltipProvider>
@@ -42,9 +42,9 @@
         <div v-if="showProgress"
           :class="`space-y-3 p-4 rounded-lg border-2 ${progressColors.background} ${progressColors.border}`">
           <div class="flex items-center gap-2">
-            <LoaderCircle v-if="status === 'in_progress'" class="h-4 w-4 text-blue-600 animate-spin" />
-            <CheckCircle v-else-if="status === 'completed'" class="h-4 w-4 text-green-600" />
-            <AlertCircle v-else-if="status === 'failed'" class="h-4 w-4 text-red-600" />
+            <LoaderCircle v-if="status === 'in_progress'" :class="`h-4 w-4 ${progressColors.icon} animate-spin`" />
+            <CheckCircle v-else-if="status === 'completed'" :class="`h-4 w-4 ${progressColors.icon}`" />
+            <AlertCircle v-else-if="status === 'failed'" :class="`h-4 w-4 ${progressColors.icon}`" />
             <span :class="`text-sm font-medium ${progressColors.text}`">
               {{ progressTitle }}
             </span>

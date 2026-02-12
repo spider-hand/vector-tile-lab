@@ -30,27 +30,30 @@ export const useProgress = (
       case 'completed':
         return {
           background: 'bg-green-50',
-          border: 'border-green-200',
+          border: 'border-green-600',
           text: 'text-green-900',
-          description: 'text-green-700',
-          bar: 'bg-green-600'
+          description: 'text-green-900',
+          bar: 'bg-green-600',
+          icon: 'text-green-900'
         }
       case 'failed':
         return {
           background: 'bg-red-50',
-          border: 'border-red-200',
+          border: 'border-red-600',
           text: 'text-red-900',
-          description: 'text-red-700',
-          bar: 'bg-red-600'
+          description: 'text-red-900',
+          bar: 'bg-red-600',
+          icon: 'text-red-900'
         }
       case 'in_progress':
       default:
         return {
           background: 'bg-blue-50',
-          border: 'border-blue-200',
+          border: 'border-blue-600',
           text: 'text-blue-900',
-          description: 'text-blue-700',
-          bar: 'bg-blue-600'
+          description: 'text-blue-900',
+          bar: 'bg-blue-600',
+          icon: 'text-blue-900'
         }
     }
   })

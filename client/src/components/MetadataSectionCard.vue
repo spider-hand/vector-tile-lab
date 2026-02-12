@@ -1,5 +1,5 @@
 <template>
-  <Card class="bg-gray-50 py-4 shadow-none gap-2">
+  <Card class="bg-muted/50 py-4 shadow-none gap-2">
     <CardHeader class="px-4">
       <CardTitle class="text-sm">{{ title }}</CardTitle>
     </CardHeader>

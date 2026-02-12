@@ -1,11 +1,11 @@
 <template>
   <div
-    class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
+    class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-gray-300 transition-colors cursor-pointer"
     @click="triggerFileInput"
     @dragover.prevent
     @drop.prevent="handleDrop"
   >
-    <CloudUpload class="mx-auto h-8 w-8 text-gray-400 mb-4" />
+    <CloudUpload class="mx-auto h-8 w-8 text-muted-foreground mb-4" />
     <p class="text-sm text-muted-foreground">
       {{ description }}
     </p>

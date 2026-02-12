@@ -67,11 +67,11 @@ export const TIER_COLORS: Record<ColorPaletteType, string[]> = {
 }
 
 export const COLOR_THEME_LIST = [
-  { label: 'Chart.js', value: 'chartjs' },
-  { label: 'ApexCharts', value: 'apexcharts' },
-  { label: 'Red', value: 'red' },
-  { label: 'Blue', value: 'blue' },
-  { label: 'Green', value: 'green' },
+  { label: 'Chart.js', value: 'chartjs', colors: COLOR_PALETTE_CHARTJS },
+  { label: 'ApexCharts', value: 'apexcharts', colors: COLOR_PALETTE_APEXCHARTS },
+  { label: 'Red', value: 'red', colors: COLOR_PALETTE_RED },
+  { label: 'Blue', value: 'blue', colors: COLOR_PALETTE_BLUE },
+  { label: 'Green', value: 'green', colors: COLOR_PALETTE_GREEN },
 ]
 
 export const CLASSIFICATION_METHOD_LIST: { label: string; value: MethodEnum }[] = [
@@ -80,4 +80,4 @@ export const CLASSIFICATION_METHOD_LIST: { label: string; value: MethodEnum }[] 
   { label: 'Percentile', value: MethodEnum.Percentile },
 ]
 
-export const DEFFAULT_COLOR = COLOR_PALETTE_CHARTJS[1]
+export const DEFFAULT_COLOR = '#3B82F6' // Tailwind CSS Blue-500

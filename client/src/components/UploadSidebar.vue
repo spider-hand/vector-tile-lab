@@ -22,13 +22,13 @@
             description="Click to upload or drag and drop your GeoJSON file"
             @files-selected="(files) => selectedFile = files[0]" />
           <div v-if="selectedFile"
-            class="border-2 border-solid border-green-300 bg-green-50 rounded-lg p-4 flex items-center justify-between">
+            class="border-2 border-solid border-green-600 bg-green-50 rounded-lg p-4 flex items-center justify-between">
             <div class="flex items-center gap-2 min-w-0 flex-1">
-              <CloudUpload class="h-5 w-5 text-green-600 flex-shrink-0" />
-              <span class="text-sm text-green-700 font-medium truncate">{{ selectedFile.name }}</span>
+              <CircleCheck class="h-5 w-5 text-green-900 flex-shrink-0" />
+              <span class="text-sm text-green-900 font-medium truncate">{{ selectedFile.name }}</span>
             </div>
             <Button variant="ghost" size="sm" @click="clearSelectedFile"
-              class="h-6 w-6 p-0 text-green-600 hover:text-green-800 hover:bg-green-100">
+              class="h-6 w-6 p-0 text-green-900 hover:bg-green-100">
               <X class="h-4 w-4" />
             </Button>
           </div>
@@ -58,9 +58,9 @@
         <div v-if="showProgress"
           :class="`space-y-3 p-4 rounded-lg border-2 ${progressColors.background} ${progressColors.border}`">
           <div class="flex items-center gap-2">
-            <LoaderCircle v-if="status === 'in_progress'" class="h-4 w-4 text-blue-600 animate-spin" />
-            <CheckCircle v-else-if="status === 'completed'" class="h-4 w-4 text-green-600" />
-            <AlertCircle v-else-if="status === 'failed'" class="h-4 w-4 text-red-600" />
+            <LoaderCircle v-if="status === 'in_progress'" :class="`h-4 w-4 ${progressColors.icon} animate-spin`" />
+            <CircleCheck v-else-if="status === 'completed'" :class="`h-4 w-4 ${progressColors.icon}`" />
+            <AlertCircle v-else-if="status === 'failed'" :class="`h-4 w-4 ${progressColors.icon}`" />
             <span :class="`text-sm font-medium ${progressColors.text}`">
               {{ progressTitle }}
             </span>
@@ -123,7 +123,7 @@ import FileUploadItem from './FileUploadItem.vue'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CloudUpload, LoaderCircle, X, CheckCircle, AlertCircle, File, Files } from 'lucide-vue-next'
+import { LoaderCircle, X, AlertCircle, File, Files, CircleCheck } from 'lucide-vue-next'
 import { useDatasetQuery } from '@/composables/useDatasetQuery'
 import { useSelectedData } from '@/composables/useSelectedData'
 import useTilesetQuery from '@/composables/useTilesetQuery'
