@@ -1,3 +1,17 @@
+### [1.5.0](https://github.com/spider-hand/vector-tile-lab/compare/v1.4.0...v1.5.0) (2026-02-15)
+
+#### Changes
+- Rename sidebars
+  - Upload (Upload dataset)
+  - Tweak (Generate tileset)
+  - Metadata
+  - Layer (Style layers)
+  - Attribute (Style by attribute)
+- Change UI
+- Add an option to use Mapbox tiles when a token is provided
+- Handle shapefiles which contain Japanese characters
+
+
 ### [1.4.0](https://github.com/spider-hand/vector-tile-lab/compare/v1.3.0...v1.4.0) (2026-01-20)
 
 ### Changes
