@@ -23,7 +23,7 @@ maplibregl.addProtocol('pmtiles', protocol.tile);
 
 const { selectedDatasetId, selectedTilesetId } = useSelectedData();
 const { presignedUrl, isFetchingPresignedUrl, tileset, isFetchingTileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
-const { layersVisibility, getLayerVisibility, tierStyleConfig } = useLayerStyles();
+const { layersVisibility, getLayerVisibility, tierStyleConfig, layerStyle } = useLayerStyles();
 
 const initializeMap = () => {
   if (!mapRef.value || map.value) return;
@@ -154,7 +154,7 @@ const addGenericLayer = (sourceLayer: string) => {
     'source-layer': sourceLayer,
     paint: {
       'fill-color': getFillColor(),
-      'fill-opacity': 0.6
+      'fill-opacity': layerStyle.value.fillOpacity
     },
     layout: {
       visibility: getLayerVisibility(sourceLayer, 'fill') ? 'visible' : 'none'
@@ -168,8 +168,8 @@ const addGenericLayer = (sourceLayer: string) => {
     'source-layer': sourceLayer,
     paint: {
       'line-color': getLineColor(),
-      'line-width': 1,
-      'line-opacity': 0.8
+      'line-width': layerStyle.value.lineWidth,
+      'line-opacity': layerStyle.value.lineOpacity
     },
     layout: {
       visibility: getLayerVisibility(sourceLayer, 'line') ? 'visible' : 'none'
@@ -183,8 +183,11 @@ const addGenericLayer = (sourceLayer: string) => {
     'source-layer': sourceLayer,
     paint: {
       'circle-color': getCircleColor(),
-      'circle-radius': 4,
-      'circle-opacity': 0.8,
+      'circle-radius': layerStyle.value.circleRadius,
+      'circle-opacity': layerStyle.value.circleOpacity,
+      'circle-stroke-color': layerStyle.value.circleStrokeColor === 'black' ? '#000000' : '#ffffff',
+      'circle-stroke-width': layerStyle.value.circleStrokeWidth,
+      'circle-stroke-opacity': layerStyle.value.circleStrokeOpacity,
     },
     layout: {
       visibility: getLayerVisibility(sourceLayer, 'circle') ? 'visible' : 'none'
@@ -240,6 +243,37 @@ const updateLayerVisibility = (sourceLayer: string, layerType: LayerType, visibl
   if (map.value.getLayer(layerId)) {
     map.value.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
   }
+};
+
+const updateLayerPaintProperties = () => {
+  if (!map.value || !tileset.value?.metadata?.metadata?.vector_layers) return;
+
+  const mapInstance = map.value;
+
+  tileset.value.metadata.metadata.vector_layers.forEach((layer: VectorLayer) => {
+    const sourceLayer = layer.id;
+
+    const fillLayerId = `${sourceLayer}-fill`;
+    const strokeLayerId = `${sourceLayer}-stroke`;
+    const pointLayerId = `${sourceLayer}-point`;
+
+    if (mapInstance.getLayer(fillLayerId)) {
+      mapInstance.setPaintProperty(fillLayerId, 'fill-opacity', layerStyle.value.fillOpacity);
+    }
+
+    if (mapInstance.getLayer(strokeLayerId)) {
+      mapInstance.setPaintProperty(strokeLayerId, 'line-opacity', layerStyle.value.lineOpacity);
+      mapInstance.setPaintProperty(strokeLayerId, 'line-width', layerStyle.value.lineWidth);
+    }
+
+    if (mapInstance.getLayer(pointLayerId)) {
+      mapInstance.setPaintProperty(pointLayerId, 'circle-opacity', layerStyle.value.circleOpacity);
+      mapInstance.setPaintProperty(pointLayerId, 'circle-radius', layerStyle.value.circleRadius);
+      mapInstance.setPaintProperty(pointLayerId, 'circle-stroke-width', layerStyle.value.circleStrokeWidth);
+      mapInstance.setPaintProperty(pointLayerId, 'circle-stroke-opacity', layerStyle.value.circleStrokeOpacity);
+      mapInstance.setPaintProperty(pointLayerId, 'circle-stroke-color', layerStyle.value.circleStrokeColor === 'black' ? '#000000' : '#ffffff');
+    }
+  });
 };
 
 const removePmtilesLayer = () => {
@@ -307,6 +341,15 @@ watch(
   () => tierStyleConfig.value,
   () => {
     updateLayerStyles();
+  },
+  { deep: true }
+);
+
+// Watch for layer style changes and update map layers accordingly
+watch(
+  () => layerStyle.value,
+  () => {
+    updateLayerPaintProperties();
   },
   { deep: true }
 );

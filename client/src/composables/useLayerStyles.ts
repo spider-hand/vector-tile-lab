@@ -8,9 +8,30 @@ export interface TierStyleConfig {
   colors: string[]
 }
 
+export interface LayerStyleConfig {
+  fillOpacity: number
+  lineOpacity: number
+  lineWidth: number
+  circleOpacity: number
+  circleRadius: number
+  circleStrokeWidth: number
+  circleStrokeOpacity: number
+  circleStrokeColor: 'white' | 'black'
+}
+
 const layersVisibility = ref<LayerVisibilityState>({})
 const selectedColorTheme = ref<ColorPaletteType>('chartjs')
 const tierStyleConfig = ref<TierStyleConfig | null>(null)
+const layerStyle = ref<LayerStyleConfig>({
+  fillOpacity: 0.6,
+  lineOpacity: 0.8,
+  lineWidth: 1,
+  circleOpacity: 0.8,
+  circleRadius: 4,
+  circleStrokeWidth: 0.2,
+  circleStrokeOpacity: 0.4,
+  circleStrokeColor: 'white',
+})
 
 export const useLayerStyles = () => {
   const setLayersFromMetadata = (layers: VectorLayer[]) => {
@@ -57,6 +78,7 @@ export const useLayerStyles = () => {
     layersVisibility,
     tierStyleConfig,
     selectedColorTheme,
+    layerStyle,
     setLayersFromMetadata,
     toggleLayerType,
     getLayerVisibility,

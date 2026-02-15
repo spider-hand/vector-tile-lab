@@ -1,10 +1,9 @@
 <template>
-  <BaseSidebar @close="$emit('close')" title="Tileset">
+  <BaseSidebar @close="$emit('close')" title="Attribute">
     <div class="flex flex-col gap-4">
       <EmptyState v-if="!tileset" message="No tileset available" />
       <div v-else class="flex flex-col gap-6">
         <div class="flex flex-col gap-3">
-          <h3 class="text-sm font-medium">Style by Attribute</h3>
           <div v-if="tierLists && tierLists.length > 0" class="flex flex-col gap-3">
             <LabeledSelect v-model="selectedAttributeField" label="Attribute" placeholder="Choose an attribute..."
               :options="attributeFieldOptions" @update:model-value="onAttributeFieldChange" />
@@ -29,20 +28,6 @@
             </div>
           </div>
         </div>
-        <div class="flex flex-col gap-3">
-          <h3 class="text-sm font-medium">Layer Visibility</h3>
-          <div v-if="tileset.metadata?.metadata?.vector_layers && tileset.metadata.metadata.vector_layers.length > 0">
-            <div v-for="layer in tileset.metadata.metadata.vector_layers" :key="layer.id"
-              class="flex flex-col gap-4 p-4 border rounded-lg">
-              <h4 class="text-sm font-medium">{{ layer.id }}</h4>
-              <div v-for="type in LAYER_TYPES" :key="type" class="flex items-center justify-between">
-                <label class="text-xs font-medium">{{ type.charAt(0).toUpperCase() + type.slice(1) }}</label>
-                <Switch :model-value="getLayerVisibility(layer.id, type)"
-                  @update:model-value="toggleLayerType(layer.id, type, $event)" />
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </BaseSidebar>
@@ -50,7 +35,6 @@
 
 <script setup lang="ts">
 import BaseSidebar from './BaseSidebar.vue'
-import { Switch } from '@/components/ui/switch'
 import LabeledSelect from './LabeledSelect.vue'
 import { useSelectedData } from '@/composables/useSelectedData'
 import useTilesetQuery from '@/composables/useTilesetQuery'
@@ -58,7 +42,7 @@ import { useTierListQuery } from '@/composables/useTierListQuery'
 import { useLayerStyles } from '@/composables/useLayerStyles'
 import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
-import { LAYER_TYPES, COLOR_THEME_LIST, CLASSIFICATION_METHOD_LIST, getTierColors } from '@/consts'
+import { COLOR_THEME_LIST, CLASSIFICATION_METHOD_LIST, getTierColors } from '@/consts'
 import EmptyState from './EmptyState.vue'
 
 defineEmits<{
@@ -68,7 +52,7 @@ defineEmits<{
 const { selectedDatasetId, selectedTilesetId } = useSelectedData()
 const { tileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId)
 const { tierLists } = useTierListQuery(selectedDatasetId, selectedTilesetId)
-const { selectedColorTheme, setLayersFromMetadata, toggleLayerType, getLayerVisibility, clearLayers, applyTier, clearTier } = useLayerStyles()
+const { selectedColorTheme, applyTier, clearTier } = useLayerStyles()
 
 const selectedAttributeField = ref<string>('')
 const selectedMethod = ref<string>('')
@@ -139,19 +123,6 @@ const getTierRange = (index: number): string => {
     return `${breaks[index - 1]} - ${breaks[index]}`
   }
 }
-
-// Initialize layer visibility when tileset changes
-watch(
-  () => tileset.value,
-  (newTileset) => {
-    if (newTileset?.metadata?.metadata?.vector_layers) {
-      setLayersFromMetadata(newTileset.metadata.metadata.vector_layers)
-    } else {
-      clearLayers()
-    }
-  },
-  { immediate: true }
-)
 
 // Apply the new color theme
 watch(
