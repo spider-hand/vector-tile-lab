@@ -20,7 +20,6 @@
                   class="flex items-center justify-between px-3 py-2 border rounded text-xs">
                   <div class="flex items-center gap-2">
                     <div class="w-3 h-3 rounded" :style="{ backgroundColor: getTierColor(Number(index)) }"></div>
-                    <span class="font-medium">Tier {{ Number(index) + 1 }}</span>
                   </div>
                   <span class="text-muted-foreground">
                     {{ getTierRange(Number(index)) }}
