@@ -70,25 +70,30 @@
           <LoaderCircle class="h-4 w-4 animate-spin text-muted-foreground" />
           <span class="text-sm text-muted-foreground ml-2">Loading tilesets...</span>
         </div>
-        <div v-else-if="tilesets && tilesets.length > 0" class="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead class="text-xs">ID</TableHead>
-                <TableHead class="text-xs">Name</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="tileset in tilesets" :key="tileset.id"
-                :data-state="selectedTilesetId === tileset.id && 'selected'" @click="setSelectedTileset(tileset.id)"
-                class="cursor-pointer">
-                <TableCell class="text-xs font-medium">{{ tileset.id }}</TableCell>
-                <TableCell class="text-xs truncate" :title="tileset.name">
-                  {{ tileset.name }}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+        <div v-else-if="tilesets && tilesets.length > 0" class="flex flex-col gap-2">
+          <div class="rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead class="text-xs">ID</TableHead>
+                  <TableHead class="text-xs">Name</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow v-for="tileset in tilesets" :key="tileset.id"
+                  :data-state="selectedTilesetId === tileset.id && 'selected'" @click="setSelectedTileset(tileset.id)"
+                  class="cursor-pointer">
+                  <TableCell class="text-xs font-medium">{{ tileset.id }}</TableCell>
+                  <TableCell class="text-xs truncate" :title="tileset.name">
+                    {{ tileset.name }}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+          <Button @click="handleExport" :disabled="!selectedTilesetId" variant="outline" class="h-8">
+            Export
+          </Button>
         </div>
         <EmptyState v-else message="No tileset available" />
       </div>
@@ -126,6 +131,7 @@ const showProgress = ref(false)
 const {
   tilesets,
   isFetchingTilesets,
+  presignedUrl,
   progress,
   isProgressError,
   mutateOnCreateTileset,
@@ -214,4 +220,12 @@ watch(tilesets, (newVal) => {
     }
   }
 })
+
+const handleExport = () => {
+  if (!presignedUrl.value?.presignedUrl) {
+    toast.error('Failed to export tileset', { position: 'top-center' })
+    return
+  }
+  window.open(presignedUrl.value.presignedUrl, '_blank')
+}
 </script>
