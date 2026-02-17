@@ -1,6 +1,7 @@
 import subprocess
 import os
 import shutil
+import shlex
 from celery import shared_task
 import re
 import redis
@@ -290,6 +291,7 @@ def generate_tileset_with_options(
     drop_densest_as_needed=True,
     coalesce_densest_as_needed=False,
     extend_zooms_if_still_dropping=False,
+    raw_options=None,
 ):
     print(f"Start to generate tileset '{tileset_name}' ...")
 
@@ -326,17 +328,34 @@ def generate_tileset_with_options(
         return
 
     # Prepare tippecanoe options
-    print(
-        f"Running tippecanoe for {tileset_name} with options: --maximum-zoom={maximum_zoom}, --drop-densest-as-needed={drop_densest_as_needed}, --coalesce-densest-as-needed={coalesce_densest_as_needed}, --extend-zooms-if-still-dropping={extend_zooms_if_still_dropping}"
-    )
-
-    additional_options = ["--maximum-zoom", str(maximum_zoom)]
-    if drop_densest_as_needed:
-        additional_options.append("--drop-densest-as-needed")
-    if coalesce_densest_as_needed:
-        additional_options.append("--coalesce-densest-as-needed")
-    if extend_zooms_if_still_dropping:
-        additional_options.append("--extend-zooms-if-still-dropping")
+    if raw_options:
+        try:
+            additional_options = shlex.split(raw_options)
+            print(f"Running tippecanoe for {tileset_name} with options: {raw_options}")
+        except ValueError as e:
+            redis_client.hset(
+                redis_key,
+                mapping={
+                    "status": TaskStatus.FAILED,
+                    "progress": 0,
+                },
+            )
+            tileset.status = TaskStatus.FAILED
+            tileset.save()
+            print(f"Failed to parse raw options '{raw_options}': {e}")
+            return
+    else:
+        # Build options from individual parameters (basic mode)
+        print(
+            f"Running tippecanoe for {tileset_name} with options: --maximum-zoom={maximum_zoom}, --drop-densest-as-needed={drop_densest_as_needed}, --coalesce-densest-as-needed={coalesce_densest_as_needed}, --extend-zooms-if-still-dropping={extend_zooms_if_still_dropping}"
+        )
+        additional_options = ["--maximum-zoom", str(maximum_zoom)]
+        if drop_densest_as_needed:
+            additional_options.append("--drop-densest-as-needed")
+        if coalesce_densest_as_needed:
+            additional_options.append("--coalesce-densest-as-needed")
+        if extend_zooms_if_still_dropping:
+            additional_options.append("--extend-zooms-if-still-dropping")
 
     # Run tippecanoe with progress tracking
     success = run_tippecanoe_with_progress(

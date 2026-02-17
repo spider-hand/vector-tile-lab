@@ -3,42 +3,63 @@
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-3">
         <h3 class="text-sm font-medium">Generate New Tileset</h3>
-        <div v-if="dataset" class="text-xs text-muted-foreground bg-muted/50 px-4 py-2 rounded">
-          Dataset: {{ dataset.name }}
+        <div class="flex flex-col gap-3 p-4 border rounded-lg">
+          <Tabs v-model="activeTab" class="w-full">
+            <TabsList class="grid w-full grid-cols-2">
+              <TabsTrigger value="basic">
+                <Settings />
+                Basic
+              </TabsTrigger>
+              <TabsTrigger value="advanced">
+                <Sparkle />
+                Advanced
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="basic" class="mt-3">
+              <TooltipProvider>
+                <div class="flex flex-col gap-3">
+                  <div class="flex flex-col gap-1">
+                    <InfoTooltipLabel tooltip-text="The highest zoom level for which tiles are generated (default 14)"
+                      label-text="Maximum Zoom" />
+                    <Select v-model="maximumZoom">
+                      <SelectTrigger class="h-8">
+                        <SelectValue placeholder="Select maximum zoom" />
+                      </SelectTrigger>
+                      <SelectContent class="z-[9999]">
+                        <SelectItem value="g">g (guess)</SelectItem>
+                        <SelectItem v-for="zoom in Array.from({ length: 23 }, (_, i) => i)" :key="zoom"
+                          :value="zoom.toString()">
+                          {{ zoom }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <LabeledSwitch v-model="dropDensestAsNeeded"
+                    tooltip-text="If the tiles are too big at low zoom levels, drop the least-visible features to allow tiles to be created with those features that remain"
+                    label-text="Drop densest as needed" />
+                  <LabeledSwitch v-model="coalesceDensestAsNeeded"
+                    tooltip-text="If the tiles are too big at low or medium zoom levels, merge as many features together as are necessary to allow tiles to be created with those features that are still distinguished"
+                    label-text="Coalesce densest as needed" />
+                  <LabeledSwitch v-model="extendZoomsIfStillDropping"
+                    tooltip-text="If even the tiles at high zoom levels are too big, keep adding zoom levels until one is reached that can represent all the features"
+                    label-text="Extend zooms if still dropping" />
+                </div>
+              </TooltipProvider>
+            </TabsContent>
+            <TabsContent value="advanced" class="mt-3">
+              <div class="flex flex-col gap-2">
+                <label class="text-xs text-muted-foreground">
+                  Tippecanoe Options
+                </label>
+                <Input v-model="rawOptions" placeholder="-zg --drop-densest-as-needed" class="h-8 text-xs font-mono" />
+              </div>
+            </TabsContent>
+          </Tabs>
+          <Button @click="handleGenerate" :disabled="!dataset || isCreatingTileset || showProgress" class="h-8">
+            <LoaderCircle v-if="isCreatingTileset" class="h-3 w-3 animate-spin mr-2" />
+            {{ isCreatingTileset ? 'Generating...' : 'Generate' }}
+          </Button>
         </div>
-        <TooltipProvider>
-          <div class="flex flex-col gap-3 p-4 border rounded-lg">
-            <div class="flex flex-col gap-1">
-              <InfoTooltipLabel tooltip-text="The highest zoom level for which tiles are generated (default 14)"
-                label-text="Maximum Zoom" />
-              <Select v-model="maximumZoom">
-                <SelectTrigger class="h-8">
-                  <SelectValue placeholder="Select maximum zoom" />
-                </SelectTrigger>
-                <SelectContent class="z-[9999]">
-                  <SelectItem value="g">g (guess)</SelectItem>
-                  <SelectItem v-for="zoom in Array.from({ length: 23 }, (_, i) => i)" :key="zoom"
-                    :value="zoom.toString()">
-                    {{ zoom }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <LabeledSwitch v-model="dropDensestAsNeeded"
-              tooltip-text="If the tiles are too big at low zoom levels, drop the least-visible features to allow tiles to be created with those features that remain"
-              label-text="Drop densest as needed" />
-            <LabeledSwitch v-model="coalesceDensestAsNeeded"
-              tooltip-text="If the tiles are too big at low or medium zoom levels, merge as many features together as are necessary to allow tiles to be created with those features that are still distinguished"
-              label-text="Coalesce densest as needed" />
-            <LabeledSwitch v-model="extendZoomsIfStillDropping"
-              tooltip-text="If even the tiles at high zoom levels are too big, keep adding zoom levels until one is reached that can represent all the features"
-              label-text="Extend zooms if still dropping" />
-            <Button @click="handleGenerate" :disabled="!dataset || isCreatingTileset || showProgress" class="h-8">
-              <LoaderCircle v-if="isCreatingTileset" class="h-3 w-3 animate-spin mr-2" />
-              {{ isCreatingTileset ? 'Generating...' : 'Generate' }}
-            </Button>
-          </div>
-        </TooltipProvider>
         <div v-if="showProgress"
           :class="`space-y-3 p-4 rounded-lg border-2 ${progressColors.background} ${progressColors.border}`">
           <div class="flex items-center gap-2">
@@ -110,7 +131,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { LoaderCircle, CheckCircle, AlertCircle } from 'lucide-vue-next'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
+import { LoaderCircle, CheckCircle, AlertCircle, Settings, Sparkle } from 'lucide-vue-next'
 import { useSelectedData } from '@/composables/useSelectedData'
 import { useDatasetQuery } from '@/composables/useDatasetQuery'
 import useTilesetQuery from '@/composables/useTilesetQuery'
@@ -122,11 +145,15 @@ defineEmits<{
   close: []
 }>()
 
+type TweakTabType = 'basic' | 'advanced'
+
 const { selectedDatasetId, selectedTilesetId, setSelectedTileset } = useSelectedData()
 const { dataset } = useDatasetQuery(selectedDatasetId)
 
 const createdTilesetId = ref<number | null>(null)
 const showProgress = ref(false)
+const activeTab = ref<TweakTabType>('basic')
+const rawOptions = ref<string>('')
 
 const {
   tilesets,
@@ -166,14 +193,21 @@ const handleGenerate = () => {
 
   const tilesetName = `tileset_${Date.now()}`
 
-  mutateOnCreateTileset(
-    {
+  const options = activeTab.value === 'advanced'
+    ? {
+      name: tilesetName,
+      rawOptions: rawOptions.value ?? undefined
+    }
+    : {
       name: tilesetName,
       maximumZoom: maximumZoom.value,
       dropDensestAsNeeded: dropDensestAsNeeded.value,
       coalesceDensestAsNeeded: coalesceDensestAsNeeded.value,
       extendZoomsIfStillDropping: extendZoomsIfStillDropping.value
-    },
+    }
+
+  mutateOnCreateTileset(
+    options,
     {
       onSuccess: (data) => {
         createdTilesetId.value = data.id
@@ -200,6 +234,7 @@ watch(() => progress.value?.status, (newVal, oldVal) => {
     setTimeout(() => {
       showProgress.value = false
       createdTilesetId.value = null
+      rawOptions.value = ''
       toast('Tileset generation complete! Your tileset is now available.', { position: 'top-center' })
     }, 3000)
   } else if (oldVal === 'in_progress' && newVal === 'failed') {

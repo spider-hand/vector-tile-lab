@@ -105,12 +105,14 @@ export const useTilesetQuery = (
       dropDensestAsNeeded,
       coalesceDensestAsNeeded,
       extendZoomsIfStillDropping,
+      rawOptions,
     }: {
       name: string
-      maximumZoom: string
-      dropDensestAsNeeded: boolean
-      coalesceDensestAsNeeded: boolean
-      extendZoomsIfStillDropping: boolean
+      maximumZoom?: string
+      dropDensestAsNeeded?: boolean
+      coalesceDensestAsNeeded?: boolean
+      extendZoomsIfStillDropping?: boolean
+      rawOptions?: string
     }) => {
       const datasetIdValue = toValue(datasetId)
       if (!datasetIdValue) throw new Error('Dataset ID is required')
@@ -123,6 +125,7 @@ export const useTilesetQuery = (
           dropDensestAsNeeded,
           coalesceDensestAsNeeded,
           extendZoomsIfStillDropping,
+          rawOptions,
         },
       })
     },

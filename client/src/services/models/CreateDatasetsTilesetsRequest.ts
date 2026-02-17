@@ -49,6 +49,12 @@ export interface CreateDatasetsTilesetsRequest {
      * @memberof CreateDatasetsTilesetsRequest
      */
     extendZoomsIfStillDropping?: boolean;
+    /**
+     * Raw tippecanoe options string (e.g., '--maximum-zoom 14 --drop-densest-as-needed'). If provided, other options are ignored.
+     * @type {string}
+     * @memberof CreateDatasetsTilesetsRequest
+     */
+    rawOptions?: string;
 }
 
 /**
@@ -74,6 +80,7 @@ export function CreateDatasetsTilesetsRequestFromJSONTyped(json: any, ignoreDisc
         'dropDensestAsNeeded': json['drop_densest_as_needed'] == null ? undefined : json['drop_densest_as_needed'],
         'coalesceDensestAsNeeded': json['coalesce_densest_as_needed'] == null ? undefined : json['coalesce_densest_as_needed'],
         'extendZoomsIfStillDropping': json['extend_zooms_if_still_dropping'] == null ? undefined : json['extend_zooms_if_still_dropping'],
+        'rawOptions': json['raw_options'] == null ? undefined : json['raw_options'],
     };
 }
 
@@ -93,6 +100,7 @@ export function CreateDatasetsTilesetsRequestToJSONTyped(value?: CreateDatasetsT
         'drop_densest_as_needed': value['dropDensestAsNeeded'],
         'coalesce_densest_as_needed': value['coalesceDensestAsNeeded'],
         'extend_zooms_if_still_dropping': value['extendZoomsIfStillDropping'],
+        'raw_options': value['rawOptions'],
     };
 }
 

@@ -1,3 +1,4 @@
+import shlex
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from rest_framework import status
@@ -167,6 +168,10 @@ class TilesetViewSet(
                         "description": "Whether to extend zooms if still dropping",
                         "default": False,
                     },
+                    "raw_options": {
+                        "type": "string",
+                        "description": "Raw tippecanoe options string (e.g., '--maximum-zoom 14 --drop-densest-as-needed').",
+                    },
                 },
                 "required": ["name"],
             }
@@ -195,14 +200,7 @@ class TilesetViewSet(
             )
 
         name = request.data.get("name")
-        maximum_zoom = request.data.get("maximum_zoom", "g")
-        drop_densest_as_needed = request.data.get("drop_densest_as_needed", True)
-        coalesce_densest_as_needed = request.data.get(
-            "coalesce_densest_as_needed", False
-        )
-        extend_zooms_if_still_dropping = request.data.get(
-            "extend_zooms_if_still_dropping", False
-        )
+        raw_options = request.data.get("raw_options")
 
         if not name:
             return Response(
@@ -210,36 +208,86 @@ class TilesetViewSet(
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if maximum_zoom != "g":
+        if raw_options:
+            # Blacklist certain options which users should not control
+            blacklisted_options = [
+                "-o",
+                "--output",
+                "-f",
+                "--force",
+                "-e",
+                "--output-to-directory",
+            ]
             try:
-                zoom_int = int(maximum_zoom)
-                if zoom_int < 0 or zoom_int > 22:
-                    return Response(
-                        {"error": "maximum_zoom must be between 0-22 or 'g'"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-            except ValueError:
+                parsed_options = shlex.split(raw_options)
+            except ValueError as e:
                 return Response(
-                    {"error": "maximum_zoom must be a number between 0-22 or 'g'"},
+                    {"error": f"Invalid options format: {str(e)}"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        tileset = Tileset.objects.create(
-            dataset=dataset,
-            name=name,
-            status=TaskStatus.IN_PROGRESS,
-            metadata={},
-        )
+            for opt in parsed_options:
+                if opt in blacklisted_options:
+                    return Response(
+                        {
+                            "error": f"Option '{opt}' is not allowed. Input/output paths are managed by the server."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
-        generate_tileset_with_options.delay(
-            dataset.name,
-            tileset.id,
-            name,
-            maximum_zoom,
-            drop_densest_as_needed,
-            coalesce_densest_as_needed,
-            extend_zooms_if_still_dropping,
-        )
+            tileset = Tileset.objects.create(
+                dataset=dataset,
+                name=name,
+                status=TaskStatus.IN_PROGRESS,
+                metadata={},
+            )
+
+            generate_tileset_with_options.delay(
+                dataset.name,
+                tileset.id,
+                name,
+                raw_options=raw_options,
+            )
+        else:
+            maximum_zoom = request.data.get("maximum_zoom", "g")
+            drop_densest_as_needed = request.data.get("drop_densest_as_needed", True)
+            coalesce_densest_as_needed = request.data.get(
+                "coalesce_densest_as_needed", False
+            )
+            extend_zooms_if_still_dropping = request.data.get(
+                "extend_zooms_if_still_dropping", False
+            )
+
+            if maximum_zoom != "g":
+                try:
+                    zoom_int = int(maximum_zoom)
+                    if zoom_int < 0 or zoom_int > 22:
+                        return Response(
+                            {"error": "maximum_zoom must be between 0-22 or 'g'"},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                except ValueError:
+                    return Response(
+                        {"error": "maximum_zoom must be a number between 0-22 or 'g'"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            tileset = Tileset.objects.create(
+                dataset=dataset,
+                name=name,
+                status=TaskStatus.IN_PROGRESS,
+                metadata={},
+            )
+
+            generate_tileset_with_options.delay(
+                dataset.name,
+                tileset.id,
+                name,
+                maximum_zoom=maximum_zoom,
+                drop_densest_as_needed=drop_densest_as_needed,
+                coalesce_densest_as_needed=coalesce_densest_as_needed,
+                extend_zooms_if_still_dropping=extend_zooms_if_still_dropping,
+            )
 
         serializer = self.get_serializer(tileset)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

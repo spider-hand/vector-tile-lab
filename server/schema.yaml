@@ -172,6 +172,11 @@ paths:
                   type: boolean
                   description: Whether to extend zooms if still dropping
                   default: false
+                raw_options:
+                  type: string
+                  description: Raw tippecanoe options string (e.g., '--maximum-zoom
+                    14 --drop-densest-as-needed'). If provided, other options are
+                    ignored.
               required:
               - name
       security:
