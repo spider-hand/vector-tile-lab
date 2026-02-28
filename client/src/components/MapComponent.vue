@@ -62,14 +62,15 @@ const initializeMap = () => {
 const flyToTilesetBounds = (header: TileHeader) => {
   if (!map.value) return;
 
-  const [centerLng, centerLat] = header.center;
+  const [minLng, minLat, maxLng, maxLat] = header.bounds;
 
-  map.value.flyTo({
-    center: [centerLng, centerLat],
-    zoom: 3,
-    duration: 1500,
-    essential: true
-  });
+  map.value.fitBounds(
+    [[minLng, minLat], [maxLng, maxLat]],
+    {
+      padding: 50,
+      duration: 1500
+    }
+  );
 };
 
 const addPmtilesLayer = (pmtilesUrl: string, tilesetMetadata: TileMetadataResponse) => {
