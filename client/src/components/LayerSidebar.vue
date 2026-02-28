@@ -1,5 +1,5 @@
 <template>
-  <BaseSidebar @close="$emit('close')" title="Layer">
+  <BaseSidebar :open="open" @close="$emit('close')" title="Layer">
     <div class="flex flex-col gap-4">
       <EmptyState v-if="!tileset" message="No tileset available" />
       <div v-else class="flex flex-col gap-6">
@@ -153,6 +153,10 @@ import useTilesetQuery from '@/composables/useTilesetQuery'
 import { useLayerStyles } from '@/composables/useLayerStyles'
 import { watch } from 'vue'
 import { LAYER_TYPES } from '@/consts'
+
+defineProps<{
+  open: boolean
+}>()
 
 defineEmits<{
   close: []

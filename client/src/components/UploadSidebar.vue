@@ -1,5 +1,5 @@
 <template>
-  <BaseSidebar @close="emits('close')" title="Upload">
+  <BaseSidebar :open="open" @close="emits('close')" title="Upload">
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
         <h3 class="text-sm font-medium">File Format</h3>
@@ -131,6 +131,10 @@ import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
 import Separator from './ui/separator/Separator.vue'
 import EmptyState from './EmptyState.vue'
+
+defineProps<{
+  open: boolean
+}>()
 
 const emits = defineEmits<{
   close: []

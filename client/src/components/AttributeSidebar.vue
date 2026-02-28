@@ -1,5 +1,5 @@
 <template>
-  <BaseSidebar @close="$emit('close')" title="Attribute">
+  <BaseSidebar :open="open" @close="$emit('close')" title="Attribute">
     <div class="flex flex-col gap-4">
       <EmptyState v-if="!tileset" message="No tileset available" />
       <div v-else class="flex flex-col gap-6">
@@ -44,6 +44,10 @@ import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
 import { COLOR_THEME_LIST, CLASSIFICATION_METHOD_LIST, getTierColors } from '@/consts'
 import EmptyState from './EmptyState.vue'
+
+defineProps<{
+  open: boolean
+}>()
 
 defineEmits<{
   close: []

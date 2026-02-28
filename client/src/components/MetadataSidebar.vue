@@ -1,5 +1,5 @@
 <template>
-  <BaseSidebar @close="$emit('close')" title="Metadata">
+  <BaseSidebar :open="open" @close="$emit('close')" title="Metadata">
     <div class="flex-1">
       <EmptyState v-if="!data" message="No tileset available" />
       <div v-else class="flex flex-col gap-4">
@@ -91,6 +91,10 @@ import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
 import type { DataStat, TileMetadataResponse } from '@/types';
 import { calculateTilesAtZoom } from '@/utils';
+
+defineProps<{
+  open: boolean
+}>()
 
 defineEmits<{
   close: []

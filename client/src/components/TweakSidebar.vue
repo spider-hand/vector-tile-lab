@@ -1,5 +1,5 @@
 <template>
-  <BaseSidebar @close="$emit('close')" title="Tweak">
+  <BaseSidebar :open="open" @close="$emit('close')" title="Tweak">
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-3">
         <h3 class="text-sm font-medium">Generate New Tileset</h3>
@@ -140,6 +140,10 @@ import useTilesetQuery from '@/composables/useTilesetQuery'
 import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
 import EmptyState from './EmptyState.vue'
+
+defineProps<{
+  open: boolean
+}>()
 
 defineEmits<{
   close: []
