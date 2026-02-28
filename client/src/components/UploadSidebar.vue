@@ -22,13 +22,13 @@
             description="Click to upload or drag and drop your GeoJSON file"
             @files-selected="(files) => selectedFile = files[0]" />
           <div v-if="selectedFile"
-            class="border-2 border-solid border-green-600 bg-green-50 rounded-lg p-4 flex items-center justify-between">
+            class="border-2 border-solid border-green-600 bg-green-50 dark:bg-green-950 rounded-lg p-4 flex items-center justify-between">
             <div class="flex items-center gap-2 min-w-0 flex-1">
-              <CircleCheck class="h-5 w-5 text-green-900 flex-shrink-0" />
-              <span class="text-sm text-green-900 font-medium truncate">{{ selectedFile.name }}</span>
+              <CircleCheck class="h-5 w-5 text-green-900 dark:text-green-100 flex-shrink-0" />
+              <span class="text-sm text-green-900 dark:text-green-100 font-medium truncate">{{ selectedFile.name }}</span>
             </div>
             <Button variant="ghost" size="sm" @click="clearSelectedFile"
-              class="h-6 w-6 p-0 text-green-900 hover:bg-green-100">
+              class="h-6 w-6 p-0 text-green-900 dark:text-green-100 hover:bg-green-100 dark:hover:bg-green-900">
               <X class="h-4 w-4" />
             </Button>
           </div>
@@ -69,7 +69,7 @@
             <div :class="`flex justify-end text-sm mb-1 ${progressColors.text}`">
               <span>{{ progressPercentage }}%</span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div :class="progressColors.bar" class="h-2 rounded-full transition-all duration-300 ease-out"
                 :style="{ width: `${progressPercentage}%` }">
               </div>

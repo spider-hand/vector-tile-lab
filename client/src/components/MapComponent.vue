@@ -6,12 +6,13 @@
 <script setup lang="ts">
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { mapTileMonitor } from '@/utils';
 import * as pmtiles from 'pmtiles';
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
 import { useLayerStyles } from '@/composables/useLayerStyles';
+import { useTheme } from '@/composables/useTheme';
 import type { LayerType, TileHeader, TileMetadataResponse, VectorLayer } from '@/types';
 import { DEFFAULT_COLOR } from '@/consts';
 
@@ -24,13 +25,23 @@ maplibregl.addProtocol('pmtiles', protocol.tile);
 const { selectedDatasetId, selectedTilesetId } = useSelectedData();
 const { presignedUrl, isFetchingPresignedUrl, tileset, isFetchingTileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
 const { layersVisibility, getLayerVisibility, tierStyleConfig, layerStyle } = useLayerStyles();
+const { theme } = useTheme();
+
+const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+
+const mapTileUrl = computed(() => {
+  const style = theme.value === 'dark' ? 'dark-v11' : 'light-v11';
+  return mapboxToken
+    ? `https://api.mapbox.com/styles/v1/mapbox/${style}/tiles/{z}/{x}/{y}?access_token=${mapboxToken}`
+    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+});
+
+const mapAttribution = mapboxToken
+  ? '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>'
+  : '©<a href="https://www.openstreetmap.org/copyright/ja">OpenStreetMap</a> contributors';
 
 const initializeMap = () => {
   if (!mapRef.value || map.value) return;
-
-  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-  const tile = mapboxToken ? `https://api.mapbox.com/styles/v1/mapbox/light-v11/tiles/{z}/{x}/{y}?access_token=${mapboxToken}` : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-  const attribution = mapboxToken ? '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>' : '©<a href="https://www.openstreetmap.org/copyright/ja">OpenStreetMap</a> contributors';
 
   map.value = new maplibregl.Map({
     container: mapRef.value as HTMLElement,
@@ -40,10 +51,10 @@ const initializeMap = () => {
         'raster-tiles': {
           type: 'raster',
           tiles: [
-            tile,
+            mapTileUrl.value,
           ],
           tileSize: 256,
-          attribution: attribution,
+          attribution: mapAttribution,
         }
       },
       layers: [{
@@ -353,6 +364,18 @@ watch(
     updateLayerPaintProperties();
   },
   { deep: true }
+);
+
+watch(
+  () => theme.value,
+  () => {
+    if (!map.value || !mapboxToken) return;
+
+    const source = map.value.getSource('raster-tiles') as maplibregl.RasterTileSource;
+    if (source) {
+      source.setTiles([mapTileUrl.value]);
+    }
+  }
 );
 
 onMounted(() => {

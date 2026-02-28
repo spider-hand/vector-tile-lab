@@ -1,16 +1,16 @@
 <template>
   <div class="border-2 border-solid rounded-lg p-4 flex items-center justify-between"
-    :class="file ? 'border-green-600 bg-green-50' : 'border-gray-200 bg-muted/50'">
+    :class="file ? 'border-green-600 bg-green-50 dark:bg-green-950' : 'border-gray-200 dark:border-gray-700 bg-muted/50'">
     <div v-if="!file" class="flex items-center gap-2">
-      <span class="text-xs font-mono px-2 py-1 rounded" :class="file ? 'text-green-900' : 'text-muted-foreground'">{{
+      <span class="text-xs font-mono px-2 py-1 rounded" :class="file ? 'text-green-900 dark:text-green-100' : 'text-muted-foreground'">{{
         extension }}</span>
     </div>
     <div v-else class="flex items-center gap-2 min-w-0 flex-1">
-      <CircleCheck class="h-5 w-5 text-green-900 flex-shrink-0" />
-      <span class="text-sm text-green-900 font-medium truncate">{{ file.name }}</span>
+      <CircleCheck class="h-5 w-5 text-green-900 dark:text-green-100 flex-shrink-0" />
+      <span class="text-sm text-green-900 dark:text-green-100 font-medium truncate">{{ file.name }}</span>
     </div>
     <Button v-if="file" variant="ghost" size="sm" @click="$emit('remove')"
-      class="h-6 w-6 p-0 text-green-900 hover:bg-green-100">
+      class="h-6 w-6 p-0 text-green-900 dark:text-green-100 hover:bg-green-100 dark:hover:bg-green-900">
       <X class="h-4 w-4" />
     </Button>
   </div>

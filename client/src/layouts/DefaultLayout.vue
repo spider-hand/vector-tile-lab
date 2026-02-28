@@ -25,6 +25,12 @@
     <AttributeSidebar :open="attributeSidebarOpen" @close="activeItem = null" />
   </div>
 
+  <Button v-if="mapboxToken" variant="ghost" size="icon"
+    class="fixed top-2 right-2 z-[999] bg-background" @click="toggleTheme">
+    <Sun v-if="theme === 'dark'" class="h-4 w-4" />
+    <Moon v-else class="h-4 w-4" />
+  </Button>
+
   <main>
     <router-view />
   </main>
@@ -37,8 +43,13 @@ import UploadSidebar from '@/components/UploadSidebar.vue'
 import MetadataSidebar from '@/components/MetadataSidebar.vue'
 import TweakSidebar from '@/components/TweakSidebar.vue'
 import AttributeSidebar from '@/components/AttributeSidebar.vue'
-import { FileText, SlidersHorizontal, Upload, Tags, Layers, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { FileText, SlidersHorizontal, Upload, Tags, Layers, ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-vue-next'
 import LayerSidebar from '@/components/LayerSidebar.vue'
+import { useTheme } from '@/composables/useTheme'
+
+const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN
+
+const { theme, toggleTheme } = useTheme()
 
 type MenuItem = 'Upload' | 'Tweak' | 'Metadata' | 'Layer' | 'Attribute';
 const items: Array<{ title: MenuItem; icon: Component }> = [
