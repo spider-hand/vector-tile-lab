@@ -112,7 +112,7 @@
               </TableBody>
             </Table>
           </div>
-          <Button @click="handleExport" :disabled="!selectedTilesetId" variant="outline" class="h-8">
+          <Button @click="handleExport" :disabled="!selectedTilesetId" class="h-8">
             Export
           </Button>
         </div>

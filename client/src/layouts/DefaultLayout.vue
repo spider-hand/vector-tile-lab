@@ -23,6 +23,7 @@
     <MetadataSidebar :open="metadataSidebarOpen" @close="activeItem = null" />
     <LayerSidebar :open="layerSidebarOpen" @close="activeItem = null" />
     <AttributeSidebar :open="attributeSidebarOpen" @close="activeItem = null" />
+    <CaptureSidebar :open="captureSidebarOpen" @close="activeItem = null" />
   </div>
 
   <Button v-if="mapboxToken" variant="ghost" size="icon"
@@ -43,7 +44,8 @@ import UploadSidebar from '@/components/UploadSidebar.vue'
 import MetadataSidebar from '@/components/MetadataSidebar.vue'
 import TweakSidebar from '@/components/TweakSidebar.vue'
 import AttributeSidebar from '@/components/AttributeSidebar.vue'
-import { FileText, SlidersHorizontal, Upload, Tags, Layers, ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-vue-next'
+import CaptureSidebar from '@/components/CaptureSidebar.vue'
+import { FileText, SlidersHorizontal, Upload, Tags, Layers, ChevronLeft, ChevronRight, Sun, Moon, Camera } from 'lucide-vue-next'
 import LayerSidebar from '@/components/LayerSidebar.vue'
 import { useTheme } from '@/composables/useTheme'
 
@@ -51,13 +53,14 @@ const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN
 
 const { theme, toggleTheme } = useTheme()
 
-type MenuItem = 'Upload' | 'Tweak' | 'Metadata' | 'Layer' | 'Attribute';
+type MenuItem = 'Upload' | 'Tweak' | 'Metadata' | 'Layer' | 'Attribute' | 'Capture';
 const items: Array<{ title: MenuItem; icon: Component }> = [
   { title: 'Upload', icon: Upload },
   { title: 'Tweak', icon: SlidersHorizontal },
   { title: 'Metadata', icon: FileText },
   { title: 'Layer', icon: Layers },
-  { title: 'Attribute', icon: Tags }
+  { title: 'Attribute', icon: Tags },
+  { title: 'Capture', icon: Camera },
 ]
 
 const activeItem = ref<MenuItem | null>(null)
@@ -68,6 +71,7 @@ const tweakSidebarOpen = computed(() => activeItem.value === 'Tweak')
 const metadataSidebarOpen = computed(() => activeItem.value === 'Metadata')
 const layerSidebarOpen = computed(() => activeItem.value === 'Layer')
 const attributeSidebarOpen = computed(() => activeItem.value === 'Attribute')
+const captureSidebarOpen = computed(() => activeItem.value === 'Capture')
 
 const handleMenuClick = (title: MenuItem) => {
   if (activeItem.value === title) {

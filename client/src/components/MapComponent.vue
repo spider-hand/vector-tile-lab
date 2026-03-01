@@ -1,5 +1,14 @@
 <template>
-  <div ref="mapRef" class="absolute! top-0 left-0 w-full h-full">
+  <div class="absolute top-0 left-0 w-full h-full flex items-center"
+    :class="isPreviewMode ? 'bg-muted pr-4 justify-end' : 'justify-center'">
+    <div ref="captureRef" class="relative overflow-hidden"
+      :class="isPreviewMode ? 'rounded-lg shadow-2xl' : 'w-full h-full'" :style="previewContainerStyle">
+      <div ref="mapRef" class="absolute top-0 left-0 w-full h-full"></div>
+      <MapLegend v-if="isPreviewMode && legendSettings.visible" :title="legendSettings.title"
+        :font-family="legendSettings.fontFamily" :font-size="legendSettings.fontSize"
+        :title-font-weight="legendSettings.titleFontWeight" :item-font-weight="legendSettings.itemFontWeight"
+        :position="legendSettings.position" :padding="legendSettings.padding" :visible="legendSettings.visible" />
+    </div>
   </div>
 </template>
 
@@ -13,19 +22,39 @@ import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
 import { useLayerStyles } from '@/composables/useLayerStyles';
 import { useTheme } from '@/composables/useTheme';
+import { useExportSettings } from '@/composables/useExportSettings';
 import type { LayerType, TileHeader, TileMetadataResponse, VectorLayer } from '@/types';
 import { DEFFAULT_COLOR } from '@/consts';
+import MapLegend from './MapLegend.vue';
+import html2canvas from 'html2canvas-pro';
 
 const mapRef = ref<HTMLElement | null>(null);
+const captureRef = ref<HTMLElement | null>(null);
 const map = ref<maplibregl.Map | null>(null);
 
 const protocol = new pmtiles.Protocol();
 maplibregl.addProtocol('pmtiles', protocol.tile);
 
-const { selectedDatasetId, selectedTilesetId } = useSelectedData();
+const { selectedDatasetId, selectedDatasetName, selectedTilesetId } = useSelectedData();
 const { presignedUrl, isFetchingPresignedUrl, tileset, isFetchingTileset } = useTilesetQuery(selectedDatasetId, selectedTilesetId);
 const { layersVisibility, getLayerVisibility, tierStyleConfig, layerStyle } = useLayerStyles();
 const { theme } = useTheme();
+const { isPreviewMode, legendSettings, aspectRatioValue, registerExportHandler } = useExportSettings();
+
+const previewContainerStyle = computed(() => {
+  if (!isPreviewMode.value) {
+    return {}
+  }
+
+  const isSquare = aspectRatioValue.value === 1
+
+  return {
+    width: isSquare ? '600px' : '800px',
+    maxWidth: isSquare ? '600px' : '800px',
+    maxHeight: '600px',
+    aspectRatio: aspectRatioValue.value.toString(),
+  }
+})
 
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -102,7 +131,7 @@ const addPmtilesLayer = (pmtilesUrl: string, tilesetMetadata: TileMetadataRespon
     });
   }
 
-  // @ts-expect-error Type instantiation is excessively deep and possibly infinite.ts-plugin(2589)
+  // @ts-expect-error Type instantiation is excessively deep and possibly infinite.
   mapTileMonitor.setup(map.value, "pmtiles-source");
 
   flyToTilesetBounds(tilesetMetadata.header);
@@ -377,6 +406,55 @@ watch(
     }
   }
 );
+
+watch(
+  [isPreviewMode, aspectRatioValue],
+  () => {
+    requestAnimationFrame(() => {
+      map.value?.resize();
+    });
+  }
+);
+
+const exportAsImage = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (!captureRef.value || !map.value) {
+      resolve()
+      return
+    }
+
+    map.value.once('idle', async () => {
+      if (!captureRef.value) {
+        resolve()
+        return
+      }
+
+      try {
+        const canvas = await html2canvas(captureRef.value, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          scale: 2,
+        })
+
+        const datasetName = selectedDatasetName.value ?? null
+        const link = document.createElement('a')
+        link.download = datasetName ? `${datasetName}-${Date.now()}.png` : `${Date.now()}.png`
+        link.href = canvas.toDataURL('image/png')
+        link.click()
+        resolve()
+      } catch (error) {
+        console.error('Failed to export image:', error)
+        reject(error)
+      }
+    })
+
+    map.value.triggerRepaint()
+  })
+}
+
+// Register export handler
+registerExportHandler(exportAsImage);
 
 onMounted(() => {
   initializeMap();

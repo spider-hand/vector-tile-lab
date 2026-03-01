@@ -21,7 +21,7 @@
                     <div class="w-3 h-3 rounded" :style="{ backgroundColor: getTierColor(Number(index)) }"></div>
                   </div>
                   <span class="text-muted-foreground">
-                    {{ getTierRange(Number(index)) }}
+                    {{ getTierRange(Number(index), selectedTierList.breaks) }}
                   </span>
                 </div>
               </div>
@@ -43,7 +43,7 @@ import { useLayerStyles } from '@/composables/useLayerStyles'
 import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
 import { COLOR_THEME_LIST, COLOR_THEME_GROUPS, CLASSIFICATION_METHOD_LIST } from '@/consts'
-import { getTierColors } from '@/utils'
+import { getTierColors, getTierRange } from '@/utils'
 import EmptyState from './EmptyState.vue'
 
 defineProps<{
@@ -114,19 +114,6 @@ const getTierColor = (index: number): string => {
   const classCount = selectedTierList.value.breaks.length
   const themeColors = getTierColors(selectedColorTheme.value, classCount)
   return themeColors[index]
-}
-
-const getTierRange = (index: number): string => {
-  if (!selectedTierList.value) return ''
-  const breaks = selectedTierList.value.breaks
-
-  if (index === 0) {
-    // First tier: ≤ breaks[0]
-    return `≤ ${breaks[0]}`
-  } else {
-    // Subsequent tiers: breaks[i-1] < value ≤ breaks[i]
-    return `${breaks[index - 1]} - ${breaks[index]}`
-  }
 }
 
 // Apply the new color theme

@@ -99,7 +99,7 @@
             </TableHeader>
             <TableBody>
               <TableRow v-for="dataset in datasets" :key="dataset.id"
-                :data-state="selectedDatasetId === dataset.id && 'selected'" @click="setSelectedDataset(dataset.id)"
+                :data-state="selectedDatasetId === dataset.id && 'selected'" @click="setSelectedDataset(dataset.id, dataset.geojsonFile ? getFileName(dataset.geojsonFile) : null)"
                 class="cursor-pointer">
                 <TableCell class="text-xs font-medium">{{ dataset.id }}</TableCell>
                 <TableCell v-if="dataset.geojsonFile" class="text-xs truncate" :title="dataset.geojsonFile">
@@ -240,7 +240,8 @@ const getFileName = (filePath: string): string => {
 
 watch(isFetchingDatasets, (newVal, oldVal) => {
   if (oldVal && !newVal && !selectedDatasetId.value && datasets.value && datasets.value.length > 0) {
-    setSelectedDataset(datasets.value[0].id)
+    const firstDataset = datasets.value[0]
+    setSelectedDataset(firstDataset.id, firstDataset.geojsonFile ? getFileName(firstDataset.geojsonFile) : null)
   }
 })
 
@@ -255,7 +256,8 @@ watch(() => progress.value?.status, (newVal, oldVal) => {
     refetchDatasets()
 
     if (createdDatasetId.value) {
-      setSelectedDataset(createdDatasetId.value)
+      const createdDataset = datasets.value?.find(d => d.id === createdDatasetId.value)
+      setSelectedDataset(createdDatasetId.value, createdDataset?.geojsonFile ? getFileName(createdDataset.geojsonFile) : null)
     }
 
     setTimeout(() => {

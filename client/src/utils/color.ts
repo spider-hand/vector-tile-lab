@@ -26,3 +26,13 @@ export const getTierColors = (schemaName: ColorPaletteType, classCount: number):
   if (!schema) return []
   return sampleColors(schema.colors, classCount)
 }
+
+export const getTierRange = (index: number, breaks: number[]): string => {
+  if (!breaks || breaks.length === 0) return ''
+
+  if (index === 0) {
+    return `≤ ${breaks[0]}`
+  } else {
+    return `${breaks[index - 1]} - ${breaks[index]}`
+  }
+}
