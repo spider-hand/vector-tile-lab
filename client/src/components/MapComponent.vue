@@ -16,7 +16,6 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { computed, onMounted, ref, watch } from 'vue';
-import { mapTileMonitor } from '@/utils';
 import * as pmtiles from 'pmtiles';
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
@@ -118,8 +117,6 @@ const addPmtilesLayer = (pmtilesUrl: string, tilesetMetadata: TileMetadataRespon
 
   removePmtilesLayer();
 
-  mapTileMonitor.clear();
-
   map.value.addSource('pmtiles-source', {
     type: 'vector',
     url: `pmtiles://${pmtilesUrl}`,
@@ -130,9 +127,6 @@ const addPmtilesLayer = (pmtilesUrl: string, tilesetMetadata: TileMetadataRespon
       addGenericLayer(layer.id);
     });
   }
-
-  // @ts-expect-error Type instantiation is excessively deep and possibly infinite.
-  mapTileMonitor.setup(map.value, "pmtiles-source");
 
   flyToTilesetBounds(tilesetMetadata.header);
 };
