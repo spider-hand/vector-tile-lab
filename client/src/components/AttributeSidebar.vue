@@ -11,7 +11,7 @@
               placeholder="Choose a method..." :options="availableMethods"
               @update:model-value="applySelectedAttribute" />
             <LabeledSelect v-if="selectedAttributeField && selectedMethod" v-model="selectedColorTheme"
-              label="Color Theme" placeholder="Choose a color theme..." :options="COLOR_THEME_LIST" />
+              label="Color Theme" placeholder="Choose a color theme..." :options="COLOR_THEME_LIST" :groups="COLOR_THEME_GROUPS" />
             <div v-if="selectedTierList" class="flex flex-col gap-2">
               <label class="text-xs font-medium text-muted-foreground">Legend</label>
               <div class="grid grid-cols-1 gap-2">
@@ -42,7 +42,8 @@ import { useTierListQuery } from '@/composables/useTierListQuery'
 import { useLayerStyles } from '@/composables/useLayerStyles'
 import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
-import { COLOR_THEME_LIST, CLASSIFICATION_METHOD_LIST, getTierColors } from '@/consts'
+import { COLOR_THEME_LIST, COLOR_THEME_GROUPS, CLASSIFICATION_METHOD_LIST } from '@/consts'
+import { getTierColors } from '@/utils'
 import EmptyState from './EmptyState.vue'
 
 defineProps<{

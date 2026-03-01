@@ -20,7 +20,7 @@ export interface LayerStyleConfig {
 }
 
 const layersVisibility = ref<LayerVisibilityState>({})
-const selectedColorTheme = ref<ColorPaletteType>('chartjs')
+const selectedColorTheme = ref<ColorPaletteType>('Burg')
 const tierStyleConfig = ref<TierStyleConfig | null>(null)
 const layerStyle = ref<LayerStyleConfig>({
   fillOpacity: 0.6,
