@@ -175,8 +175,7 @@ paths:
                 raw_options:
                   type: string
                   description: Raw tippecanoe options string (e.g., '--maximum-zoom
-                    14 --drop-densest-as-needed'). If provided, other options are
-                    ignored.
+                    14 --drop-densest-as-needed').
               required:
               - name
       security:
