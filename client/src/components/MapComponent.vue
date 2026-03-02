@@ -26,6 +26,7 @@ import type { LayerType, TileHeader, TileMetadataResponse, VectorLayer } from '@
 import { DEFFAULT_COLOR } from '@/consts';
 import MapLegend from './MapLegend.vue';
 import html2canvas from 'html2canvas-pro';
+import { createTierColorExpression } from '@/utils';
 
 const mapRef = ref<HTMLElement | null>(null);
 const captureRef = ref<HTMLElement | null>(null);
@@ -129,30 +130,6 @@ const addPmtilesLayer = (pmtilesUrl: string, tilesetMetadata: TileMetadataRespon
   }
 
   flyToTilesetBounds(tilesetMetadata.header);
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const createTierColorExpression = (field: string, breaks: number[], colors: string[]): any => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const expression: any[] = ['case'];
-
-  for (let i = 0; i < breaks.length; i++) {
-    if (i === 0) {
-      // First class: value <= breaks[0]
-      expression.push(['<=', ['get', field], breaks[i]], colors[i]);
-    } else {
-      // Subsequent classes: breaks[i-1] < value <= breaks[i]
-      expression.push(
-        ['all', ['>', ['get', field], breaks[i - 1]], ['<=', ['get', field], breaks[i]]],
-        colors[i]
-      );
-    }
-  }
-
-  // Add fallback color for values that don't match any condition (required for 'case' expression)
-  expression.push(DEFFAULT_COLOR);
-
-  return expression;
 };
 
 const addGenericLayer = (sourceLayer: string) => {
