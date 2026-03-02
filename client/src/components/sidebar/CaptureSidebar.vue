@@ -61,8 +61,8 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import BaseSidebar from './BaseSidebar.vue'
-import LabeledSelect from './LabeledSelect.vue'
-import LabeledSlider from './LabeledSlider.vue'
+import LabeledSelect from '@/components/shared/LabeledSelect.vue'
+import LabeledSlider from '@/components/shared/LabeledSlider.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'

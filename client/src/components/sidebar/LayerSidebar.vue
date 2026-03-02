@@ -61,8 +61,8 @@
 
 <script setup lang="ts">
 import BaseSidebar from './BaseSidebar.vue'
-import EmptyState from './EmptyState.vue'
-import LabeledSlider from './LabeledSlider.vue'
+import EmptyState from '@/components/shared/EmptyState.vue'
+import LabeledSlider from '@/components/shared/LabeledSlider.vue'
 import { Switch } from '@/components/ui/switch'
 import { useSelectedData } from '@/composables/useSelectedData'
 import useTilesetQuery from '@/composables/useTilesetQuery'

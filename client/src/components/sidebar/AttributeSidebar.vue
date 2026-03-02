@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import BaseSidebar from './BaseSidebar.vue'
-import LabeledSelect from './LabeledSelect.vue'
+import LabeledSelect from '@/components/shared/LabeledSelect.vue'
 import { useSelectedData } from '@/composables/useSelectedData'
 import useTilesetQuery from '@/composables/useTilesetQuery'
 import { useTierListQuery } from '@/composables/useTierListQuery'
@@ -44,7 +44,7 @@ import { watch, ref, computed } from 'vue'
 import type { TierList } from '@/services/models'
 import { COLOR_THEME_LIST, COLOR_THEME_GROUPS, CLASSIFICATION_METHOD_LIST } from '@/consts'
 import { getTierColors, getTierRange } from '@/utils'
-import EmptyState from './EmptyState.vue'
+import EmptyState from '@/components/shared/EmptyState.vue'
 
 defineProps<{
   open: boolean

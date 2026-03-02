@@ -118,8 +118,8 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import BaseSidebar from './BaseSidebar.vue'
-import FileDropzone from './FileDropzone.vue'
-import FileUploadItem from './FileUploadItem.vue'
+import FileDropzone from '@/components/shared/FileDropzone.vue'
+import FileUploadItem from '@/components/shared/FileUploadItem.vue'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -129,8 +129,8 @@ import { useSelectedData } from '@/composables/useSelectedData'
 import useTilesetQuery from '@/composables/useTilesetQuery'
 import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
-import Separator from './ui/separator/Separator.vue'
-import EmptyState from './EmptyState.vue'
+import Separator from '@/components/ui/separator/Separator.vue'
+import EmptyState from '@/components/shared/EmptyState.vue'
 
 defineProps<{
   open: boolean

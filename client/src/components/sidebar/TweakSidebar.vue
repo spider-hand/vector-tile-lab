@@ -125,8 +125,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import BaseSidebar from './BaseSidebar.vue'
-import InfoTooltipLabel from './InfoTooltipLabel.vue'
-import LabeledSwitch from './LabeledSwitch.vue'
+import InfoTooltipLabel from '@/components/shared/InfoTooltipLabel.vue'
+import LabeledSwitch from '@/components/shared/LabeledSwitch.vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -139,7 +139,7 @@ import { useDatasetQuery } from '@/composables/useDatasetQuery'
 import useTilesetQuery from '@/composables/useTilesetQuery'
 import { useProgress } from '@/composables/useProgress'
 import { toast } from 'vue-sonner'
-import EmptyState from './EmptyState.vue'
+import EmptyState from '@/components/shared/EmptyState.vue'
 
 defineProps<{
   open: boolean

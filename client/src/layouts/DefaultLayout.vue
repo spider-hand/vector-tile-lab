@@ -40,13 +40,13 @@
 <script setup lang="ts">
 import { computed, ref, type Component } from 'vue'
 import { Button } from '@/components/ui/button'
-import UploadSidebar from '@/components/UploadSidebar.vue'
-import MetadataSidebar from '@/components/MetadataSidebar.vue'
-import TweakSidebar from '@/components/TweakSidebar.vue'
-import AttributeSidebar from '@/components/AttributeSidebar.vue'
-import CaptureSidebar from '@/components/CaptureSidebar.vue'
+import UploadSidebar from '@/components/sidebar/UploadSidebar.vue'
+import MetadataSidebar from '@/components/sidebar/MetadataSidebar.vue'
+import TweakSidebar from '@/components/sidebar/TweakSidebar.vue'
+import AttributeSidebar from '@/components/sidebar/AttributeSidebar.vue'
+import CaptureSidebar from '@/components/sidebar/CaptureSidebar.vue'
 import { FileText, SlidersHorizontal, Upload, Tags, Layers, ChevronLeft, ChevronRight, Sun, Moon, Camera } from 'lucide-vue-next'
-import LayerSidebar from '@/components/LayerSidebar.vue'
+import LayerSidebar from '@/components/sidebar/LayerSidebar.vue'
 import { useTheme } from '@/composables/useTheme'
 
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN

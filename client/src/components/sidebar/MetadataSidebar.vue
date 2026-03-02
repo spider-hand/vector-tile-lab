@@ -84,9 +84,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import BaseSidebar from './BaseSidebar.vue';
-import MetadataSectionCard from './MetadataSectionCard.vue';
-import LabeledValue from './LabeledValue.vue';
-import EmptyState from './EmptyState.vue'
+import MetadataSectionCard from '@/components/shared/MetadataSectionCard.vue';
+import LabeledValue from '@/components/shared/LabeledValue.vue';
+import EmptyState from '@/components/shared/EmptyState.vue'
 import useTilesetQuery from '@/composables/useTilesetQuery';
 import { useSelectedData } from '@/composables/useSelectedData';
 import type { DataStat, TileMetadataResponse } from '@/types';
