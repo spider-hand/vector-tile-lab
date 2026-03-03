@@ -1,18 +1,18 @@
-# vector-tile-lab
+# Vector Tile Lab
 
 ![demo](https://github.com/user-attachments/assets/3542c06d-2744-4069-927f-895cd8fb6d76)
 
 [![Docker Build](https://github.com/spider-hand/vector-tile-lab/actions/workflows/docker-build.yml/badge.svg)](https://github.com/spider-hand/vector-tile-lab/actions/workflows/docker-build.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-A local development tool for visualizing and experimenting with vector tiles
+A local development tool for experimenting with vector tiles.
 
-It allows you to convert GeoJSON into vector tiles, tweak Tippecanoe parameters, and immediately see how those changes affect rendering through an interactive map-based UI.
+It allows you to convert GeoJSON or Shapefile into vector tiles and quickly preview the visualization through an interactive map.
 
 ## Features
 
-- 🚀 **Zero configuration** - Launch everything with a single command. No manual setup required
-- 🗺️ **Interactive visualization** - Instantly preview generated vector tiles on an interactive map
-- ⚡ **Fast iteration** - Adjust Tippecanoe parameters and regenerate tiles without leaving the UI
+- 🐳 **Zero configuration** - Set up and launch with a single command
+- ⚡️ **Fast iteration** - Preview your vector tiles quickly
+- 🗺️ **Visualization** - Generate a beautiful map
 
 ## Quick Start
 
@@ -41,6 +41,14 @@ Change the values if needed.
 
 ```sh
 docker-compose up --build -d
+```
+
+This project works without any configuration, but if you want to use some additional features with Mapbox map, you can set their token on `client/.env`:
+
+`.env`
+
+```
+VITE_MAPBOX_TOKEN=your_mapbox_token
 ```
 
 ## Contributing
